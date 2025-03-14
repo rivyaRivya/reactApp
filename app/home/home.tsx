@@ -7,7 +7,9 @@ const HomePage = ({ navigation }) => {
     return (
         <ScrollView style={styles.container}>
             {/* Header */}
-           
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Wood Connect</Text>
+            </View>
 
             {/* Categories Section */}
             <View style={styles.section}>
