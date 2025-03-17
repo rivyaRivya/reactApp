@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, Image, StyleSheet, ActivityIndicator } from "react-native";
 import axios from "axios";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
-const ProductList = () => {
+const ProductList = ({navigation}) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -22,11 +23,11 @@ const ProductList = () => {
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.price}>${item.price}</Text>
-        </View>
+        </TouchableOpacity>
     );
 
     return (

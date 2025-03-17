@@ -1,74 +1,70 @@
-// HomePage.js
 import React from 'react';
-import { ScrollView, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Card, Button } from 'react-native-paper';
+import { View, Text, Image, Button, FlatList, ScrollView, StyleSheet } from 'react-native';
 
 const HomePage = ({ navigation }) => {
+    // Sample wood list data
+    const woodList = [
+        { id: '1', name: 'Oak', image: require('../../assets/custom.jpg') },
+        { id: '2', name: 'Pine', image: require('../../assets/decor.jpg') },
+        { id: '3', name: 'Mahogany', image: require('../../assets/furniture.jpg') },
+        { id: '4', name: 'Walnut', image: require('../../assets/custom.jpg') },
+    ];
+
+    // Sample featured products data
+    const featuredProducts = [
+        { id: '1', name: 'Wooden Chair', price: '$150', image: require('../../assets/custom.jpg') },
+        { id: '2', name: 'Wooden Table', price: '$250', image: require('../../assets/decor.jpg') },
+        { id: '3', name: 'Wooden Shelf', price: '$180', image: require('../../assets/furniture.jpg') },
+        { id: '4', name: 'Wooden Bench', price: '$220', image: require('../../assets/custom.jpg') },
+    ];
+
+    // Render Item for Wood List
+    const renderWoodItem = ({ item }) => (
+        <View style={styles.woodCard} onPress={() => navigation.navigate('Product')}>
+            <Image source={item.image} style={styles.woodImage} />
+            <Text style={styles.woodName}>{item.name}</Text>
+        </View>
+    );
+
+    // Render Item for Featured Products
+    const renderProductItem = ({ item }) => (
+        <View style={styles.productCard} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
+            <Image source={item.image} style={styles.productImage} />
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.productPrice}>{item.price}</Text>
+            {/*<Button mode="contained" onPress={() => navigation.navigate('ProductDetails', { product: item })}>*/}
+            {/*    View Details*/}
+            {/*</Button>*/}
+        </View>
+    );
+
     return (
         <ScrollView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Wood Connect</Text>
-            </View>
-
-            {/* Categories Section */}
+            {/* Wood List Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Shop by Category</Text>
+                <Text style={styles.sectionTitle}>Shop by Wood</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <Card style={styles.categoryCard}>
-                        <Image
-                            source={require('../../assets/furniture.jpg')}  // Add an image for categories
-                            style={styles.categoryImage}
-                        />
-                        <Text style={styles.categoryText}>Furniture</Text>
-                    </Card>
-                    <Card style={styles.categoryCard}>
-                        <Image
-                            source={require('../../assets/decor.jpg')}  // Add an image for categories
-                            style={styles.categoryImage}
-                        />
-                        <Text style={styles.categoryText}>Decor</Text>
-                    </Card>
-                    <Card style={styles.categoryCard}>
-                        <Image
-                            source={require('../../assets/custom.jpg')}  // Add an image for categories
-                            style={styles.categoryImage}
-                        />
-                        <Text style={styles.categoryText}>Custom Work</Text>
-                    </Card>
+                    <FlatList
+                        data={woodList}
+                        renderItem={renderWoodItem}
+                        keyExtractor={(item) => item.id}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    />
                 </ScrollView>
             </View>
 
             {/* Featured Products Section */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Featured Products</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <Card style={styles.productCard}>
-                        <Image
-                            source={require('../../assets/decor.jpg')}  // Replace with actual product images
-                            style={styles.productImage}
-                        />
-                        <Text style={styles.productName}>Wooden Chair</Text>
-                        <Text style={styles.productPrice}>$150</Text>
-                        <Button mode="contained" onPress={() => navigation.navigate('ProductDetail')}>View</Button>
-                    </Card>
-                    <Card style={styles.productCard}>
-                        <Image
-                            source={require('../../assets/furniture.jpg')}  // Replace with actual product images
-                            style={styles.productImage}
-                        />
-                        <Text style={styles.productName}>Wooden Table</Text>
-                        <Text style={styles.productPrice}>$250</Text>
-                        <Button mode="contained" onPress={() => navigation.navigate('ProductDetail')}>View</Button>
-                    </Card>
-                </ScrollView>
-            </View>
-
-            {/* Footer */}
-            <View style={styles.footer}>
-                <TouchableOpacity onPress={() => navigation.navigate('Shop')}>
-                    <Text style={styles.footerText}>Browse All Products</Text>
-                </TouchableOpacity>
+                <FlatList
+                    data={featuredProducts}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.id}
+                    numColumns={2} // Display 2 products per row
+                    columnWrapperStyle={styles.columnWrapper} // Space out the items evenly in a row
+                    showsVerticalScrollIndicator={false}
+                />
             </View>
         </ScrollView>
     );
@@ -77,73 +73,62 @@ const HomePage = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f4f4f4',
-    },
-    header: {
-        padding: 20,
-        backgroundColor: '#3E2723',
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#fff',
+        backgroundColor: '#f8f8f8',
     },
     section: {
-        marginTop: 20,
-        paddingHorizontal: 15,
+        paddingHorizontal: 20,
+        marginBottom: 30,
     },
     sectionTitle: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 15,
     },
-    categoryCard: {
-        marginRight: 10,
-        width: 150,
-        borderRadius: 10,
+    // Wood List Section Styles
+    woodCard: {
+        marginRight: 15,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 10,
+        elevation: 5,
+        alignItems: 'center',
     },
-    categoryImage: {
-        width: '100%',
-        height: 120,
-        borderRadius: 10,
+    woodImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
     },
-    categoryText: {
-        fontSize: 18,
-        textAlign: 'center',
-        marginTop: 5,
+    woodName: {
+        fontSize: 16,
         fontWeight: 'bold',
+        marginTop: 10,
     },
+    // Featured Products Section Styles
     productCard: {
-        marginRight: 10,
-        width: 180,
-        borderRadius: 10,
+        marginBottom: 15,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 15,
+        elevation: 5,
+        flex: 1, // Allow card to grow in the row
+        margin: 5, // Add space between items
     },
     productImage: {
         width: '100%',
         height: 150,
-        borderRadius: 10,
+        borderRadius: 8,
     },
     productName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
-        marginTop: 10,
-        textAlign: 'center',
+        marginVertical: 10,
     },
     productPrice: {
-        fontSize: 14,
-        color: '#ff5722',
-        textAlign: 'center',
-    },
-    footer: {
-        padding: 20,
-        backgroundColor: '#3E2723',
-        alignItems: 'center',
-    },
-    footerText: {
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#fff',
+        color: '#555',
+    },
+    columnWrapper: {
+        justifyContent: 'space-between', // Space out the items evenly in a row
     },
 });
 
