@@ -2,18 +2,23 @@ import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, Image, StyleSheet, ActivityIndicator } from "react-native";
 import axios from "axios";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import CONSTANTS from "../constant";
 
-const ProductList = ({navigation}) => {
+const ProductList = ({ navigation, route }) => {
+
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const { id } = route.params;
+    console.log(id);
     useEffect(() => {
         fetchProducts();
     }, []);
 
     const fetchProducts = async () => {
         try {
-            const response = await axios.get("https://fakestoreapi.com/products"); // Sample API
+            const response = await axios.get(`${API_URL }/productList?id=${id}`); // Sample API
             setProducts(response.data);
         } catch (error) {
             console.error("Error fetching products", error);
@@ -24,7 +29,7 @@ const ProductList = ({navigation}) => {
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image src={`data:image/png;base64,${item.display}`} style={styles.image} />
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.price}>${item.price}</Text>
         </TouchableOpacity>

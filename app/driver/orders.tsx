@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -7,33 +7,21 @@ import {
     TouchableOpacity,
     Alert
 } from 'react-native';
+import axios from "axios";
 
-// Dummy order data (you can replace this with real API data)
-const orders = [
-    {
-        id: '001',
-        customerName: 'John Doe',
-        address: '123 Main St, Springfield, IL',
-        status: 'Pending',
-        deliveryTime: '10:00 AM',
-    },
-    {
-        id: '002',
-        customerName: 'Jane Smith',
-        address: '456 Oak St, Madison, WI',
-        status: 'Delivered',
-        deliveryTime: '12:00 PM',
-    },
-    {
-        id: '003',
-        customerName: 'Tom Brown',
-        address: '789 Pine St, Chicago, IL',
-        status: 'Pending',
-        deliveryTime: '2:00 PM',
-    },
-];
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CONSTANTS from '../constant';
+
 
 const OrdersPage = ({ navigation }) => {
+
+    const [orders, setOrders] = useState([]);
+
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
+
+
     // Handle order click
     const handleOrderClick = (order) => {
         // Here, you would navigate to a detailed page with the order information
@@ -41,15 +29,38 @@ const OrdersPage = ({ navigation }) => {
         navigation.navigate('OrderDetails', { order });
     };
 
+    const listOrders = async () => {
+        try {
+            // Make an API call to the Spring Boot backend login endpoint
+            const response = await axios.get(`${API_URL}/get-orders`);
+
+            if (response) {
+                console.log(response)
+                const storedUserId = await AsyncStorage.getItem('userId');
+                console.log(storedUserId)
+                const filteredOrder = response.data.filter(order => order.userId == storedUserId);
+                setOrders(filteredOrder);
+            }
+        } catch (error) {
+            console.log("rrrrrrrrrrrrrrr")
+            // Handle login failure
+        }
+    };
+
+    useEffect(() => {
+        listOrders();
+    }, []);
+
     // Render each order item
     const renderOrderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.orderItem}
             onPress={() => handleOrderClick(item)}>
             <Text style={styles.orderId}>Order ID: {item.id}</Text>
-            <Text style={styles.customerName}>Customer: {item.customerName}</Text>
+            <Text style={styles.customerName}>Customer: {item.username}</Text>
             <Text style={styles.orderStatus}>Status: {item.status}</Text>
-            <Text style={styles.deliveryTime}>Delivery Time: {item.deliveryTime}</Text>
+            <Text style={styles.orderStatus}>Payment Status: {item.paymentStatus}</Text>
+            <Text style={styles.deliveryTime}>Delivery Date: {item.delivery_date}</Text>
         </TouchableOpacity>
     );
 

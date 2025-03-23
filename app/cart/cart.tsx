@@ -1,44 +1,97 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
-import { Card, Button } from 'react-native-paper';  // Card and Button components from react-native-paper
+﻿import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
+import { Card, Button } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from "axios";
+import CONSTANTS from '../constant';
+
+const url = CONSTANTS.BASE_URL;
+const API_URL = `${url}`;
 
 const CartPage = () => {
-    // Sample cart items
-    const [cartItems, setCartItems] = useState([
-        {
-            id: '1',
-            name: 'Wooden Dining Table',
-            price: 299.99,
-            quantity: 1,
-            image: 'https://www.saajawat.com/cdn/shop/products/5bd32673618571c606550e27402802ab_1_1000x.webp?v=1676043265',
-        },
-        {
-            id: '2',
-            name: 'Wooden Chair',
-            price: 99.99,
-            quantity: 2,
-            image: 'https://www.saajawat.com/cdn/shop/products/5bd32673618571c606550e27402802ab_1_1000x.webp?v=1676043265',
-        },
-    ]);
+    const [cartItems, setCartItems] = useState([]);
+    const [orderId, setOrderId] = useState(null);
 
-    // Function to remove item from the cart
+    useEffect(() => {
+        getOrderId();
+    }, []);
+
+    // ✅ Function to get stored userId & fetch order details
+    const getOrderId = async () => {
+        try {
+            let storedUserId = await AsyncStorage.getItem('userId');
+            let numericUserId = parseInt(storedUserId, 10) || 0;
+            console.log("User ID:", numericUserId);
+
+            const response = await axios.get(`${API_URL}/get-orderId?id=${numericUserId}`);
+            if (response.data !== 0) {
+                setOrderId(response.data);
+                listOrders(response.data);
+            } else {
+                setCartItems([]);
+            }
+        } catch (error) {
+            console.error("Error fetching order ID:", error);
+        }
+    };
+
+    // ✅ Function to fetch cart items
+    const listOrders = async (id) => {
+        try {
+            const response = await axios.get(`${API_URL}/get-orderDetails?id=${id}`);
+            if (response.data) {
+                console.log("Cart Data:", response.data.product);
+                setCartItems(response.data.product);
+            }
+        } catch (error) {
+            console.error("Error fetching cart items:", error);
+        }
+    };
+
+    // ✅ Remove an item from the cart
     const removeItem = (id) => {
         setCartItems(cartItems.filter(item => item.id !== id));
     };
 
-    // Function to calculate the total price
+    // ✅ Update quantity (increase or decrease)
+    const updateQuantity = (id, change) => {
+        setCartItems(cartItems.map(item =>
+            item.id === id
+                ? { ...item, quantity: Math.max(1, item.quantity + change) } // Prevent quantity < 1
+                : item
+        ));
+    };
+
+    // ✅ Calculate total price
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
     };
 
+    // ✅ Render cart item
     const renderItem = ({ item }) => (
         <Card style={styles.cartItem}>
             <View style={styles.cartItemContent}>
-                <Image source={{ uri: item.image }} style={styles.productImage} />
+                <Image source={{ uri: `data:image/png;base64,${item.image}` }} style={styles.productImage} />
                 <View style={styles.cartItemDetails}>
-                    <Text style={styles.cartItemName}>{item.name}</Text>
-                    <Text style={styles.cartItemPrice}>${item.price} each</Text>
-                    <Text style={styles.cartItemQuantity}>Quantity: {item.quantity}</Text>
+                    <Text style={styles.cartItemName}>{item.productname}</Text>
+                    <Text style={styles.cartItemPrice}>₹{item.price} each</Text>
+
+                    {/* Quantity Control */}
+                    <View style={styles.quantityContainer}>
+                        <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() => updateQuantity(item.id, -1)}
+                        >
+                            <Text style={styles.quantityButtonText}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.cartItemQuantity}>{item.quantity}</Text>
+                        <TouchableOpacity
+                            style={styles.quantityButton}
+                            onPress={() => updateQuantity(item.id, 1)}
+                        >
+                            <Text style={styles.quantityButtonText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 <TouchableOpacity style={styles.removeButton} onPress={() => removeItem(item.id)}>
                     <Text style={styles.removeButtonText}>Remove</Text>
@@ -55,18 +108,18 @@ const CartPage = () => {
             <FlatList
                 data={cartItems}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.cartList}
             />
 
             {/* Total Price Section */}
             <View style={styles.totalPriceContainer}>
                 <Text style={styles.totalPriceLabel}>Total Price:</Text>
-                <Text style={styles.totalPrice}>${calculateTotal()}</Text>
+                <Text style={styles.totalPrice}>₹{calculateTotal()}</Text>
             </View>
 
             {/* Checkout Button */}
-            <Button mode="contained" style={styles.checkoutButton}>
+            <Button mode="contained" style={styles.checkoutButton} onPress={() => Alert.alert("Proceeding to checkout")}>
                 Proceed to Checkout
             </Button>
         </View>
@@ -120,6 +173,7 @@ const styles = StyleSheet.create({
     cartItemQuantity: {
         fontSize: 14,
         color: '#555',
+        marginHorizontal: 10,
     },
     removeButton: {
         backgroundColor: '#ff6347',
@@ -157,6 +211,21 @@ const styles = StyleSheet.create({
         marginTop: 20,
         paddingVertical: 15,
         backgroundColor: '#4caf50',
+    },
+    quantityContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    quantityButton: {
+        backgroundColor: '#f0f0f0',
+        padding: 5,
+        borderRadius: 5,
+        marginHorizontal: 5,
+    },
+    quantityButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
     },
 });
 

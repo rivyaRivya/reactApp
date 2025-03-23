@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -6,51 +6,77 @@ import {
     FlatList,
     Image
 } from 'react-native';
+import axios from "axios";
+import CONSTANTS from '../constant';
 
-// Sample order data with products and image URLs
-const order = {
-    id: '001',
-    customerName: 'John Doe',
-    address: '123 Main St, Springfield, IL',
-    status: 'Pending',
-    deliveryTime: '10:00 AM',
-    products: [
-        {
-            productId: 'P001',
-            name: 'Wooden Chair',
-            quantity: 2,
-            price: 50.00,
-            imageUrl: 'https://ii1.pepperfry.com/media/catalog/product/m/a/1600x1760/marin-solid-wood-6-seater-dining-set-in-provincial-teak-finish-by-woodsworth-marin-solid-wood-6-seat-mtanqa.jpg' // Example image URL
-        },
-        {
-            productId: 'P002',
-            name: 'Wooden Table',
-            quantity: 1,
-            price: 150.00,
-            imageUrl: 'https://ii1.pepperfry.com/media/catalog/product/m/a/1600x1760/marin-solid-wood-6-seater-dining-set-in-provincial-teak-finish-by-woodsworth-marin-solid-wood-6-seat-mtanqa.jpg' // Example image URL
-        },
-        {
-            productId: 'P003',
-            name: 'Wooden Shelf',
-            quantity: 3,
-            price: 30.00,
-            imageUrl: 'https://ii1.pepperfry.com/media/catalog/product/m/a/1600x1760/marin-solid-wood-6-seater-dining-set-in-provincial-teak-finish-by-woodsworth-marin-solid-wood-6-seat-mtanqa.jpg' // Example image URL
-        },
-    ],
-};
+const OrderDetailsPage = ({ route }) => {
 
-const OrderDetailsPage = () => {
+    const [order, setOrders] = useState({
+        advanced_amount: null,
+        assign_date: null,
+        delivery_date: null,
+        driverId: null,
+        driverName: null,
+        id: null,
+        orderDate: null,
+        paymentStatus: null,
+        status: null,
+        total_amount: null,
+        userId: null,
+        username: null,
+        products: []
+});
+
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
+
+    console.log(route.params)
+    const data = route.params.order;
+    const listOrderDetails = async () => {
+        try {
+            // Make an API call to the Spring Boot backend login endpoint
+            const response = await axios.get(`${API_URL}/get-orderDetails?id=${data.id}`);
+
+            if (response) {
+                console.log(response)
+                const datas = {
+                    advanced_amount: response.data.order.advanced_amount,
+                    assign_date: response.data.order.assign_date,
+                    delivery_date: response.data.order.delivery_date,
+                    driverId: response.data.order.driverId,
+                    driverName: response.data.order.driverName,
+                    id: response.data.order.id,
+                    orderDate: response.data.order.orderDate,
+                    paymentStatus: response.data.order.paymentStatus,
+                    status: response.data.order.status,
+                    total_amount: response.data.order.total_amount,
+                    userId: response.data.order.userId,
+                    username: response.data.order.username,
+                    products: response.data.product
+                }
+                setOrders(datas);
+            }
+        } catch (error) {
+            console.log("rrrrrrrrrrrrrrr")
+            // Handle login failure
+        }
+    };
+
+    useEffect(() => {
+        listOrderDetails();
+    }, []);
+
     // Render each product item
     const renderProductItem = ({ item }) => (
         <View style={styles.productItem}>
             {/* Product Image */}
-            <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+            <Image source={{ uri: `data:image/png;base64,${item.image}` }} style={styles.productImage} />
 
             {/* Product Information */}
             <View style={styles.productDetails}>
-                <Text style={styles.productName}>{item.name}</Text>
+                <Text style={styles.productName}>{item.productname}</Text>
                 <Text style={styles.productQuantity}>Quantity: {item.quantity}</Text>
-                <Text style={styles.productPrice}>Price: ${item.price.toFixed(2)}</Text>
+                <Text style={styles.productPrice}>Price: ₹{item.price}</Text>
             </View>
         </View>
     );
@@ -61,10 +87,12 @@ const OrderDetailsPage = () => {
 
             {/* Order Information */}
             <Text style={styles.orderId}>Order ID: {order.id}</Text>
-            <Text style={styles.customerName}>Customer: {order.customerName}</Text>
-            <Text style={styles.address}>Address: {order.address}</Text>
+            <Text style={styles.customerName}>Customer: {order.username}</Text>
+            {/*<Text style={styles.address}>Address: {order.}</Text>*/}
             <Text style={styles.orderStatus}>Status: {order.status}</Text>
-            <Text style={styles.deliveryTime}>Delivery Time: {order.deliveryTime}</Text>
+            <Text style={styles.orderStatus}>Advance Amount: ₹{order.advanced_amount}</Text>
+            <Text style={styles.orderStatus}>Total Amount: ₹{order.total_amount}</Text>
+            <Text style={styles.deliveryTime}>Delivery Time: {order.delivery_date}</Text>
 
             {/* Product List */}
             <Text style={styles.productListTitle}>Products in this Order:</Text>

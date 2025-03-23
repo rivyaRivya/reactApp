@@ -1,41 +1,65 @@
-import React from 'react';
-import { View, Text, Image, Button, FlatList, ScrollView, StyleSheet } from 'react-native';
+﻿import React, { useEffect, useState } from 'react';
+import { View, Text, Image, Button, FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from "axios";
+import CONSTANTS from '../constant';
 
 const HomePage = ({ navigation }) => {
-    // Sample wood list data
-    const woodList = [
-        { id: '1', name: 'Oak', image: require('../../assets/custom.jpg') },
-        { id: '2', name: 'Pine', image: require('../../assets/decor.jpg') },
-        { id: '3', name: 'Mahogany', image: require('../../assets/furniture.jpg') },
-        { id: '4', name: 'Walnut', image: require('../../assets/custom.jpg') },
-    ];
 
-    // Sample featured products data
-    const featuredProducts = [
-        { id: '1', name: 'Wooden Chair', price: '$150', image: require('../../assets/custom.jpg') },
-        { id: '2', name: 'Wooden Table', price: '$250', image: require('../../assets/decor.jpg') },
-        { id: '3', name: 'Wooden Shelf', price: '$180', image: require('../../assets/furniture.jpg') },
-        { id: '4', name: 'Wooden Bench', price: '$220', image: require('../../assets/custom.jpg') },
-    ];
+
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
+    const [loading, setLoading] = useState(true);
+    const [woodList, setWoodList] = useState([]);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+   
+    const fetchWood = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/wood-type`); // Sample API
+            setWoodList(response.data);
+        } catch (error) {
+            console.error("Error fetching wood", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const fetchProduct = async() => {
+        try {
+            const response = await axios.get(`${API_URL}/get-product`); // Sample API
+            
+            if (response) {
+                const selectedObject = response?.data.filter(item => item.featured);
+                setFeaturedProducts(selectedObject);
+            }
+        } catch (error) {
+            console.error("Error fetching wood", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    useEffect(() => {
+        fetchWood();
+        fetchProduct();
+    }, []);
 
     // Render Item for Wood List
     const renderWoodItem = ({ item }) => (
-        <View style={styles.woodCard} onPress={() => navigation.navigate('Product')}>
-            <Image source={item.image} style={styles.woodImage} />
-            <Text style={styles.woodName}>{item.name}</Text>
-        </View>
+        <TouchableOpacity style={styles.woodCard} onPress={() => navigation.navigate('Product', { id: item.id })}>
+            <Image src={`data:image/png;base64,${item.image}`} style={styles.woodImage} />
+            <Text style={styles.woodName}>{item.woodname}</Text>
+        </TouchableOpacity>
     );
 
     // Render Item for Featured Products
     const renderProductItem = ({ item }) => (
-        <View style={styles.productCard} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
-            <Image source={item.image} style={styles.productImage} />
-            <Text style={styles.productName}>{item.name}</Text>
-            <Text style={styles.productPrice}>{item.price}</Text>
+        <TouchableOpacity style={styles.productCard} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
+            <Image src={`data:image/png;base64,${item.display}`} style={styles.productImage} />
+            <Text style={styles.productName}>{item.productname}</Text>
+            <Text style={styles.productPrice}>₹{item.price}</Text>
             {/*<Button mode="contained" onPress={() => navigation.navigate('ProductDetails', { product: item })}>*/}
             {/*    View Details*/}
             {/*</Button>*/}
-        </View>
+        </TouchableOpacity>
     );
 
     return (
@@ -78,6 +102,7 @@ const styles = StyleSheet.create({
     section: {
         paddingHorizontal: 20,
         marginBottom: 30,
+        marginTop:10
     },
     sectionTitle: {
         fontSize: 24,

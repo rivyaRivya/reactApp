@@ -5,6 +5,16 @@ import { TextInput, Button } from 'react-native-paper';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
+
+import axios from "axios";
+import Toast from 'react-native-toast-message';
+import CONSTANTS from '../constant';
+
+
+const url = CONSTANTS.BASE_URL;
+const API_URL = `${url}`;
+
+
 // Validation schema
 const validationSchema = Yup.object().shape({
     username: Yup.string().required('Username is required'),
@@ -17,15 +27,42 @@ const validationSchema = Yup.object().shape({
         .required('Password is required'),
 });
 
-const RegisterScreen = () => {
+const RegisterScreen = ({ navigation }) => {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Create Account</Text>
             <Formik
-                initialValues={{ username: '', email: '', mobile: '', password: '' }}
+                initialValues={{ firstname: '', lastname: '', email: '', mobile: '', password: '' }}
                 validationSchema={validationSchema}
-                onSubmit={(values) => {
+                onSubmit={async (values) => {
                     console.log(values);
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('firstname', values.firstname);
+                        formData.append('lastname', values.lastname);
+                        formData.append('email', values.email);
+                        formData.append('phone', values.mobile);
+                        formData.append('password', values.password);
+                        formData.append('type', "user");
+                        const response = await axios.post(`${API_URL}/user`, formData);
+                        console.log("Response:", response.data);
+
+                        // Show success message
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Success',
+                            text2: 'Register successfully.Please login!',
+                        });
+                        navigation.navigate('Login');
+                    } catch (error) {
+                        console.error("Error submitting form:", error);
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Errro',
+                            text2: 'Failed to register. Please try again!',
+                        });
+                    } 
                     // You can call your API or do further actions on successful form submission
                 }}
             >
@@ -39,15 +76,27 @@ const RegisterScreen = () => {
                 }) => (
                     <>
                         <TextInput
-                            label="Username"
-                            value={values.username}
-                            onChangeText={handleChange('username')}
-                            onBlur={handleBlur('username')}
-                            error={touched.username && errors.username} 
+                            label="First name"
+                            value={values.firstname}
+                            onChangeText={handleChange('firstname')}
+                            onBlur={handleBlur('firstname')}
+                            error={touched.firstname && errors.firstname} 
                             style={styles.input}
                         />
-                        {touched.username && errors.username && (
-                            <Text style={styles.errorText}>{errors.username}</Text>
+                        {touched.firstname && errors.firstname && (
+                            <Text style={styles.errorText}>{errors.firstname}</Text>
+                        )}
+
+                        <TextInput
+                            label="Last name"
+                            value={values.lastname}
+                            onChangeText={handleChange('lastname')}
+                            onBlur={handleBlur('firstname')}
+                            error={touched.lastname && errors.lastname}
+                            style={styles.input}
+                        />
+                        {touched.lastname && errors.lastname && (
+                            <Text style={styles.errorText}>{errors.lastname}</Text>
                         )}
 
                         <TextInput

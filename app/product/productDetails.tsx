@@ -1,123 +1,140 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, FlatList } from 'react-native';
-import { Card } from 'react-native-paper';  // Using React Native Paper for a clean UI
+﻿import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { Rating } from 'react-native-ratings'; // Importing the Rating component for star ratings
+import axios from "axios";
+import { Card, Button } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CONSTANTS from "../constant";
 
 const ProductDetails = ({ route }) => {
-    const { product } = route.params;  // Extract product data passed from the list page
+    const { product } = route.params;
+    const [loading, setLoading] = useState(true);
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
+    const [products, setProduct] = useState(Object);
+    const [quantity, setQuantity] = useState(1);
+
+    const increaseQuantity = () => setQuantity(quantity + 1);
+    const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const toCamelCase = (str) => {
+        console.log(str)
+        if (!str || typeof str !== 'string') return '';
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+            .join('');
+    };
+
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/product-details?id=${product.id}`); // Sample API
+            setProduct(response.data);
+        } catch (error) {
+            console.error("Error fetching products", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const addToCart = async () => {
+        console.log("click")
+        try {
+            const storedUserId = await AsyncStorage.getItem('userId');
+            console.log(storedUserId)
+            const data = {
+                productId: products.id,
+                quantity: quantity,
+                userId: storedUserId,
+                paymentStatus: "pending",
+                advanced_amount: 500,
+                orderDate: new Date(),
+                orderStatus: "pending",
+                total_amount: 0,
+                type:"inc"
+            }
+            const response = await axios.post(`${API_URL}/create-order`, data);
+            //if (response) {
+            //    console.log("iii");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Success',
+                    text2: 'Product added to cart!',
+                });
+            //}
+        } catch (error) {
+            console.log(error);
+            // Handle login failure
+        }
+    }
 
     return (
         <ScrollView style={styles.container}>
-            {/* Product Image */}
-            <Image source={{ uri: product.image }} style={styles.productImage} />
-
-            {/* Product Information Card */}
+            {/* Product Card with Image and Details */}
             <Card style={styles.card}>
                 <Card.Content>
-                    <Text style={styles.productTitle}>{product.name}</Text>
-                    <Text style={styles.productPrice}>${product.price}</Text>
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: `data:image/png;base64,${products.image}` }}
+                            style={styles.productImage}
+                            resizeMode="cover"
+                        />
+                    </View>
+                    <Text style={styles.productTitle}>{toCamelCase(products.productname)}</Text>
+                    <Text style={styles.productPrice}>₹{products.price}</Text>
+                    <Text style={styles.manufactureDate}>Manufactured: {products.manufacture}</Text>
+                    <Text style={styles.sectionTitle}>Type of Wood:</Text>
+                    <Text style={styles.detailText}>{products.woodtypename}</Text>
+                    <Text style={styles.sectionTitle}>Dimensions:</Text>
+                    <Text style={styles.detailText}>{products.length} cm x {products.width} cm</Text>
+                    <Text style={styles.sectionTitle}>Specifications:</Text>
+                    <Text style={styles.detailText}>{products.description}</Text>
+
+                    {/* Quantity Selector */}
+                    <View style={styles.quantityContainer}>
+                        <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
+                            <Text style={styles.quantityText}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.quantityValue}>{quantity}</Text>
+                        <TouchableOpacity onPress={increaseQuantity} style={styles.quantityButton}>
+                            <Text style={styles.quantityText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Add to Cart Button */}
+                    <View style={styles.quantityContainer}>
+                    <TouchableOpacity onPress={addToCart} style={styles.addToCartButton}>
+                        <Text style={styles.addToCartText}>Add to Cart</Text>
+                        </TouchableOpacity>
+                    </View>
                 </Card.Content>
             </Card>
-
-            {/* Type of Wood and Dimensions */}
-            <View style={styles.detailsContainer}>
-                <Text style={styles.sectionTitle}>Type of Wood:</Text>
-                <Text style={styles.detailText}>{product.woodType}</Text>
-
-                <Text style={styles.sectionTitle}>Dimensions:</Text>
-                <Text style={styles.detailText}>Length: {product.length} cm</Text>
-                <Text style={styles.detailText}>Width: {product.width} cm</Text>
-
-                <Text style={styles.sectionTitle}>Specifications:</Text>
-                <Text style={styles.detailText}>{product.specifications}</Text>
-            </View>
-
-             Rating Section 
-            <View style={styles.ratingContainer}>
-                <Text style={styles.sectionTitle}>Customer Rating</Text>
-                <Rating
-                    type="star"
-                    ratingCount={5}
-                    imageSize={30}
-                    readonly
-                    startingValue={product.rating.rate}
-                />
-                <Text style={styles.ratingText}>Average Rating: {product.rating.rate} / 5</Text>
-            </View>
-
-            {/* Reviews Section */}
-            {/*<View style={styles.reviewsContainer}>*/}
-            {/*    <Text style={styles.sectionTitle}>Reviews</Text>*/}
-            {/*    <FlatList*/}
-            {/*        data={product.reviews}*/}
-            {/*        keyExtractor={(item, index) => index.toString()}*/}
-            {/*        renderItem={({ item }) => (*/}
-            {/*            <View style={styles.reviewItem}>*/}
-            {/*                <Text style={styles.reviewUsername}>{item.username}</Text>*/}
-            {/*                <Text style={styles.reviewText}>"{item.review}"</Text>*/}
-            {/*                <Text style={styles.reviewDate}>{item.date}</Text>*/}
-            {/*            </View>*/}
-            {/*        )}*/}
-            {/*    />*/}
-            {/*</View>*/}
         </ScrollView>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f7f7f7',
-        padding: 20,
-    },
-    productImage: {
-        width: '100%',
-        height: 250,
-        borderRadius: 10,
-        marginBottom: 15,
-        resizeMode: 'contain',
-    },
-    card: {
-        marginBottom: 20,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-    },
-    productTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    productPrice: {
-        fontSize: 22,
-        color: '#888',
-        marginTop: 5,
-    },
-    detailsContainer: {
-        marginTop: 20,
-        paddingVertical: 10,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        paddingHorizontal: 15,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginTop: 10,
-    },
-    detailText: {
-        fontSize: 16,
-        color: '#555',
-        marginVertical: 5,
-    },
+const styles = {
+    container: { padding:0, backgroundColor: '#F8F9FA' },
+    imageContainer: { alignItems: 'center', marginBottom: 16 },
+    productImage: { width: '100%', height: 200, borderRadius: 12 },
+    card: { marginBottom: 16, padding: 16 },
+    productTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
+    productPrice: { fontSize: 18, color: '#E91E63', marginBottom: 8 },
+    manufactureDate: { fontSize: 14, color: '#777' },
+    sectionTitle: { fontSize: 16, fontWeight: '600', marginTop: 8 },
+    detailText: { fontSize: 14, color: '#444' },
+    quantityContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16 },
+    quantityButton: { padding: 10, backgroundColor: '#ddd', borderRadius: 8, marginHorizontal: 8 },
+    quantityText: { fontSize: 18, fontWeight: 'bold' },
+    quantityValue: { fontSize: 18, fontWeight: 'bold', marginHorizontal: 8 },
+    buttonContainer: { marginTop: 20, alignItems: 'center' },
+
     ratingContainer: {
         marginTop: 20,
         backgroundColor: '#fff',
@@ -162,6 +179,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
     },
-});
+};
 
 export default ProductDetails;
