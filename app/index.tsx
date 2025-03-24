@@ -115,7 +115,29 @@ export default function Index() {
                 >
                     <Stack.Screen name="Home" component={MyDrawer} options={{ headerShown: false }} />
                     <Stack.Screen name="Product" component={ProductList} />
-                    <Stack.Screen name="ProductDetails" component={ProductDetails} />
+                <Stack.Screen name="ProductDetails" component={ProductDetails}
+                options={({ navigation }) => ({
+                    title: 'Product Details',
+                    headerStyle: {
+                        backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                    },
+                    headerTitleStyle: {
+                        color: '#fff',
+                        fontWeight: 'bold', // Title font weight
+                    },
+                    headerTintColor: '#fff',
+                    headerRight: () => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}>
+                            <Ionicons
+                                name="cart-outline"
+                                size={30}
+                                color="white"
+                                onPress={() => navigation.navigate('Cart')} // Navigate to the Cart Page
+                            />
+
+                        </View>
+                    ),
+                })}                />
                     <Stack.Screen name="Cart" component={CartPage} />
                     <Stack.Screen name="OrderDetails" component={OrderDetailsPage} />
                     <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
