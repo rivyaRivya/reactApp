@@ -45,8 +45,8 @@ const LoginScreen = ({ navigation }) => {
                 }
             } catch (error) {
                 Toast.show({
-                    type: 'success',
-                    text1: 'Success',
+                    type: 'error',
+                    text1: 'Error',
                     text2: 'Login failed! Invalid credentials.!',
                 });
             }

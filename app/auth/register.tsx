@@ -17,7 +17,7 @@ const API_URL = `${url}`;
 
 // Validation schema
 const validationSchema = Yup.object().shape({
-    username: Yup.string().required('Username is required'),
+    firstname: Yup.string().required('Username is required'),
     email: Yup.string().email('Invalid email').required('Email is required'),
     mobile: Yup.string()
         .matches(/^\d{10}$/, 'Mobile number should be 10 digits')
@@ -138,7 +138,9 @@ const RegisterScreen = ({ navigation }) => {
                             <Text style={styles.errorText}>{errors.password}</Text>
                         )}
 
-                        <Button mode="contained" onPress={handleSubmit} style={styles.button}>
+                        <Button mode="contained" onPress={() => {
+                            handleSubmit();
+                        }} style={styles.button}>
                             Register
                         </Button>
                     </>
