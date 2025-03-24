@@ -55,6 +55,7 @@ function MyDrawer() {
             ) : userType === "driver" ? (
                 <>
                     <Drawer.Screen name="Orders" component={OrdersPage} />
+                    <Drawer.Screen name="Profile" component={ProfilePage} />
                     <Drawer.Screen
                             name="Logout"
                             component={LoginScreen}
