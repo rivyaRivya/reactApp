@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -12,6 +12,7 @@ import axios from "axios";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CONSTANTS from '../constant';
+import { AuthContext } from '../auth/authContext';
 
 
 const OrdersPage = ({ navigation }) => {
@@ -20,7 +21,7 @@ const OrdersPage = ({ navigation }) => {
 
     const url = CONSTANTS.BASE_URL;
     const API_URL = `${url}`;
-
+    const { isLoggedIn, userType, logout } = useContext(AuthContext);
 
     // Handle order click
     const handleOrderClick = (order) => {
@@ -29,17 +30,22 @@ const OrdersPage = ({ navigation }) => {
         navigation.navigate('OrderDetails', { order });
     };
 
-    const listOrders = async () => {
+    const listOrders = async (type) => {
         try {
             // Make an API call to the Spring Boot backend login endpoint
             const response = await axios.get(`${API_URL}/get-orders`);
-
+            console.log(type)
             if (response) {
                 console.log(response)
                 const storedUserId = await AsyncStorage.getItem('userId');
                 console.log(storedUserId)
-                const filteredOrder = response.data.filter(order => order.userId == storedUserId);
-                setOrders(filteredOrder);
+                if (type == "driver") {
+                    const filteredOrder = response.data.filter(order => (order.status == "pending" || order.driverId == storedUserId));
+                    setOrders(filteredOrder);
+                } else {
+                    const filteredOrder = response.data.filter(order => order.userId == storedUserId);
+                    setOrders(filteredOrder);
+                }
             }
         } catch (error) {
             console.log("rrrrrrrrrrrrrrr")
@@ -49,7 +55,14 @@ const OrdersPage = ({ navigation }) => {
 
     useEffect(() => {
         listOrders();
-    }, []);
+        const checkUserType = async () => {
+            const storedUserType = await AsyncStorage.getItem("userType");
+
+            listOrders(storedUserType);
+            };
+
+        checkUserType();
+    }, [isLoggedIn, userType]);
 
     // Render each order item
     const renderOrderItem = ({ item }) => (
@@ -66,7 +79,8 @@ const OrdersPage = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.pageTitle}>Orders Assigned to You</Text>
+            <Text style={styles.pageTitle}>
+                {userType == "driver" ? ("Orders Assigned to You") : ("My orders")}</Text>
 
             {/* List of Orders */}
             <FlatList
