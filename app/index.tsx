@@ -38,22 +38,47 @@ function MyDrawer() {
     if (!initialRoute) {
         return <ActivityIndicator size="large" color="blue" style={{ flex: 1, justifyContent: "center" }} />;
     }
-    const handleLogout = (navigation) => {
-        navigation.dispatch(DrawerActions.jumpTo("Login"));
-        console.log("logout")
-        logout
-        //navigation.navigate("Login");
-    }
+    const handleLogout = async (navigation) => {
+
+        await logout(); // Call the logout function properly
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "Home" }], // Reset navigation to Login
+        });
+    };
     return (
         <Drawer.Navigator initialRouteName={initialRoute}>
             {!isLoggedIn ? (
                 <>
-                    <Drawer.Screen name="Home" component={HomePage} />
+                    <Drawer.Screen name="Home" component={HomePage}
+                        options={({ navigation }) => ({
+                            title: 'Wood Connect',
+                            headerStyle: {
+                                backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                            },
+                            headerTitleStyle: {
+                                color: '#fff',
+                                fontWeight: 'bold', // Title font weight
+                            },
+                            headerTintColor: '#fff'
+                        })}/>
                     <Drawer.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                     <Drawer.Screen name="Sign up" component={RegisterScreen} options={{ headerShown: false }} />
                 </>
             ) : userType === "driver" ? (
-                <>
+                    <>
+                        <Drawer.Screen name="Home" component={HomePage}
+                            options={({ navigation }) => ({
+                                title: 'Wood Connect',
+                                headerStyle: {
+                                    backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                                },
+                                headerTitleStyle: {
+                                    color: '#fff',
+                                    fontWeight: 'bold', // Title font weight
+                                },
+                                headerTintColor: '#fff'
+                            })} />
                     <Drawer.Screen name="Orders" component={OrdersPage} />
                     <Drawer.Screen name="Profile" component={ProfilePage} />
                     <Drawer.Screen

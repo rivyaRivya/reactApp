@@ -54,7 +54,6 @@ const OrdersPage = ({ navigation }) => {
     };
 
     useEffect(() => {
-        listOrders();
         const checkUserType = async () => {
             const storedUserType = await AsyncStorage.getItem("userType");
 

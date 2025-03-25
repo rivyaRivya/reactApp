@@ -20,8 +20,8 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (userId, type) => {
-        await AsyncStorage.setItem("userId", userId);
-        await AsyncStorage.setItem("userType", type);
+        await AsyncStorage.setItem("userId", userId.toString());
+        await AsyncStorage.setItem("userType", type.toString());
 
         setIsLoggedIn(true);
         setUserType(type);
@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.removeItem("userType");
 
         setIsLoggedIn(false);
-        navigation.replace("Login");
         setUserType("");
     };
 

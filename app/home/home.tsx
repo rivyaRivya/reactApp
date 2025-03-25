@@ -1,11 +1,14 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, Image, Button, FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from "axios";
 import CONSTANTS from '../constant';
+import { AuthContext } from '../auth/authContext';
+import OrdersPage from '../driver/orders';
 
 const HomePage = ({ navigation }) => {
 
 
+    const { isLoggedIn, userType, logout } = useContext(AuthContext);
     const url = CONSTANTS.BASE_URL;
     const API_URL = `${url}`;
     const [loading, setLoading] = useState(true);
@@ -64,32 +67,31 @@ const HomePage = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* Wood List Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Shop by Wood</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <FlatList
-                        data={woodList}
-                        renderItem={renderWoodItem}
-                        keyExtractor={(item) => item.id}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                    />
-                </ScrollView>
-            </View>
-
-            {/* Featured Products Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Featured Products</Text>
-                <FlatList
-                    data={featuredProducts}
-                    renderItem={renderProductItem}
-                    keyExtractor={(item) => item.id}
-                    numColumns={2} // Display 2 products per row
-                    columnWrapperStyle={styles.columnWrapper} // Space out the items evenly in a row
-                    showsVerticalScrollIndicator={false}
-                />
-            </View>
+            {userType ==="driver" ? (
+                <OrdersPage navigation={navigation} />
+            ) : (
+            
+            <><View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Shop by Wood</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <FlatList
+                                data={woodList}
+                                renderItem={renderWoodItem}
+                                keyExtractor={(item) => item.id}
+                                horizontal
+                                showsHorizontalScrollIndicator={false} />
+                        </ScrollView>
+                    </View><View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Featured Products</Text>
+                            <FlatList
+                                data={featuredProducts}
+                                renderItem={renderProductItem}
+                                keyExtractor={(item) => item.id}
+                                numColumns={2} // Display 2 products per row
+                                columnWrapperStyle={styles.columnWrapper} // Space out the items evenly in a row
+                                showsVerticalScrollIndicator={false} />
+                        </View></>
+            )}
         </ScrollView>
     );
 };

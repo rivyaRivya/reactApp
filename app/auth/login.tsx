@@ -46,14 +46,7 @@ const LoginScreen = ({ navigation }) => {
                                 text1: 'Success',
                                 text2: 'Login successful!',
                             });
-                            if (response.data.type === "user")
-                                navigation.navigate("Home");
-                            else {
-                                navigation.dispatch(DrawerActions.jumpTo("Orders"));
-                                console.log("hhhhhhh")
-                                //navigation.navigate("Orders");
-                                //navigate("Orders", {});
-                            }
+                            navigation.navigate("Home");
                         }
                         
                     }
