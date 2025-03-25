@@ -4,12 +4,9 @@ import { View, StyleSheet, Alert } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import Toast from "react-native-toast-message";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-<<<<<<< HEAD
-=======
 import { AuthContext } from "./authContext";
 import { navigate } from "./navigationService";
 import { DrawerActions } from "@react-navigation/native";
->>>>>>> 232f2b30789215019ba3b3c1408322e889403482
 import CONSTANTS from "../constant";
 
 const LoginScreen = ({ navigation }) => {
