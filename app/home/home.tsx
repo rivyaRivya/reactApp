@@ -45,7 +45,7 @@ const HomePage = ({ navigation }) => {
     // Render Item for Wood List
     const renderWoodItem = ({ item }) => (
         <TouchableOpacity style={styles.woodCard} onPress={() => navigation.navigate('Product', { id: item.id })}>
-            <Image src={`data:image/png;base64,${item.image}`} style={styles.woodImage} />
+            <Image source={{ uri: `data:image/png;base64,${item.image}` }} style={styles.woodImage} />
             <Text style={styles.woodName}>{item.woodname}</Text>
         </TouchableOpacity>
     );
@@ -53,7 +53,7 @@ const HomePage = ({ navigation }) => {
     // Render Item for Featured Products
     const renderProductItem = ({ item }) => (
         <TouchableOpacity style={styles.productCard} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
-            <Image src={`data:image/png;base64,${item.display}`} style={styles.productImage} />
+            <Image source={{ uri: `data:image/png;base64,${item.display}` }} style={styles.productImage} />
             <Text style={styles.productName}>{item.productname}</Text>
             <Text style={styles.productPrice}>₹{item.price}</Text>
             {/*<Button mode="contained" onPress={() => navigation.navigate('ProductDetails', { product: item })}>*/}

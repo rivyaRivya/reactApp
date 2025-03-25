@@ -29,7 +29,7 @@ const ProductList = ({ navigation, route }) => {
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('ProductDetails', { product: item })}>
-            <Image src={`data:image/png;base64,${item.display}`} style={styles.image} />
+            <Image source={{ uri: `data:image/png;base64,${item.display}` }} style={styles.image} />
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.price}>${item.price}</Text>
         </TouchableOpacity>
