@@ -4,12 +4,13 @@ import { View, StyleSheet, Alert } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import Toast from "react-native-toast-message";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CONSTANTS from "../constant";
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const url = "192.168.1.46";
-    const API_URL = `http://${url}:8080`;
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
 
     const handleLogin = async () => {
         if (email !=null && password !=null) {
