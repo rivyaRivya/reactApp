@@ -153,7 +153,17 @@ const CartPage = ({ navigation }) => {
             </View>
 
             {/* Checkout Button */}
-            <Button mode="contained" style={styles.checkoutButton} onPress={() => navigation.navigate('OrderSummary')}>
+            <Button mode="contained" style={styles.checkoutButton} onPress={() => {
+                if (cartItems.length > 0) {
+                    navigation.navigate('OrderSummary');
+                } else {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Warning',
+                        text2: "Cart is empty,Please add products before proceeding to checkout.",
+                    });
+                }
+            }}>
                 Proceed to Checkout
             </Button>
         </View>

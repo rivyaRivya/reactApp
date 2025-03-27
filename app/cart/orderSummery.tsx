@@ -4,8 +4,9 @@ import { Ionicons } from '@expo/vector-icons'; // For icons
 import CONSTANTS from "../constant";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
-const OrderSummary = () => {
+const OrderSummary = ({navigation }) => {
     const [totalAmount, setTotalAmount] = useState(500); // Example total
     const [advanceAmount, setAdvanceAmount] = useState(200); // Example advance
     const [useCurrentAddress, setUseCurrentAddress] = useState(true);
@@ -22,11 +23,30 @@ const OrderSummary = () => {
     const [cartItems, setCartItems] = useState([]);
     const [orderId, setOrderId] = useState(null);
 
-    const [orders, setOrder] = useState();
+    const [orders, setOrder] = useState({});
 
 
-    const handleConfirmOrder = () => {
-        alert("Order Confirmed! 🎉");
+    const handleConfirmOrder = async () => {
+        if (!orders.district || !orders.pin || !orders.address) {
+            Toast.show({
+                type: 'error',
+                text1: 'Warning',
+                text2: 'You must add your address before proceeding.!',
+            });
+            return;
+        }
+        const formData = new FormData();
+
+        formData.append('status', "Confirmed");
+        const response = await axios.put(`${API_URL}/update-status/${orderId}`, formData);
+        if (response.status === 204 || response.status === 204) {
+            Toast.show({
+                type: 'success',
+                text1: 'Booking Confirmed',
+                text2: 'Your order booking successfully.Thank you!.'
+            });
+            navigation.navigate('Home');
+        }
     };
     useEffect(() => {
         getOrderId();
@@ -68,9 +88,19 @@ const OrderSummary = () => {
                 <Text style={styles.sectionTitle}>Shipping To</Text>
 
                 {useCurrentAddress ? (
-                    <View style={styles.infoBox}>
-                        <Ionicons name="location-outline" size={20} color="black" />
-                        <Text style={styles.infoText}>123 Main Street, New York, NY</Text>
+                    <View>
+                        <View style={styles.infoBox}>
+                            <Ionicons name="location-outline" size={20} color="black" />
+                            <Text style={styles.infoText}>{orders?.address ? orders.address : ""},{orders?.district ? orders.district : ""}, {orders?.pin ? orders.pin : ""}</Text>
+                        </View>
+                        <View style={styles.infoBox}>
+                            <Ionicons name="call-outline" size={20} color="black" />
+                            <Text style={styles.infoText}>+91 {orders.mobile}</Text>
+                        </View>
+                        <View style={styles.infoBox}>
+                            <Ionicons name="mail-outline" size={20} color="black" />
+                            <Text style={styles.infoText}>{orders.email}</Text>
+                        </View>
                     </View>
                 ) : (
                     <View style={styles.addressContainer}>
@@ -82,11 +112,11 @@ const OrderSummary = () => {
                 )}
 
                 <View style={styles.checkboxContainer}>
-                    <CheckBox value={useCurrentAddress} onValueChange={() => {
-                        setUseCurrentAddress(!useCurrentAddress);
-                        setShowAddressInput(!useCurrentAddress);
-                    }} />
-                    <Text style={styles.label}>Use Current Address as shipping address</Text>
+                    {/*<CheckBox value={useCurrentAddress} onValueChange={() => {*/}
+                    {/*    setUseCurrentAddress(!useCurrentAddress);*/}
+                    {/*    setShowAddressInput(!useCurrentAddress);*/}
+                    {/*}} />*/}
+                    {/*<Text style={styles.label}>Use Current Address as shipping address</Text>*/}
                 </View>
 
                 {!useCurrentAddress && (
@@ -101,11 +131,11 @@ const OrderSummary = () => {
                 <Text style={styles.sectionTitle}>Order Details</Text>
                 <View style={styles.infoBox}>
                     <Ionicons name="pricetag-outline" size={20} color="black" />
-                    <Text style={styles.infoText}>Total Amount: ${totalAmount}</Text>
+                    <Text style={styles.infoText}>Total Amount: ₹{orders.total_amount}</Text>
                 </View>
                 <View style={styles.infoBox}>
                     <Ionicons name="wallet-outline" size={20} color="black" />
-                    <Text style={styles.infoText}>Advance Amount: ${advanceAmount}</Text>
+                    <Text style={styles.infoText}>Advance Amount: ₹{orders.advanced_amount}</Text>
                 </View>
             </View>
 

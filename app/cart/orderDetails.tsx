@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -9,8 +9,12 @@ import {
 } from 'react-native';
 import axios from "axios";
 import CONSTANTS from '../constant';
+import { AuthContext } from '../auth/authContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OrderDetailsPage = ({ route, navigation }) => {
+
+    const { userType } = useContext(AuthContext);
     const [order, setOrders] = useState({
         advanced_amount: null,
         assign_date: null,
@@ -51,33 +55,61 @@ const OrderDetailsPage = ({ route, navigation }) => {
     }, []);
 
     const updateOrderStatus = async (status) => {
-        try {
-            await axios.post(`${API_URL}/update-orderStatus`, { id: order.id, status });
-            setOrders((prevOrder) => ({ ...prevOrder, status }));
-        } catch (error) {
-            console.log("Error updating order status", error);
+        const storedUserId = await AsyncStorage.getItem('userId');
+        console.log(storedUserId)
+        if (status == "Accepted") {
+            const formData = new FormData();
+
+            formData.append('driver_id', storedUserId);
+            console.log(formData)
+            try {
+                const response = await axios.put(`${API_URL}/update-orderTable/${order.id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
+            } catch (e) { console.log("ooo",e) }
+            listOrderDetails();
+        } else {
+            try {
+                const formData = new FormData();
+
+                formData.append('status', status);
+                await axios.put(`${API_URL}/update-status/${order.id}`, formData);
+                setOrders((prevOrder) => ({ ...prevOrder, status }));
+                listOrderDetails();
+            } catch (error) {
+                console.log("Error updating order status", error);
+            }
         }
     };
 
     const renderButtons = () => {
-        if (order.status === 'Pending') {
+        if (userType !== "driver" && order.status === 'Confirmed') {
+            return (
+                <TouchableOpacity style={styles.button} onPress={() => updateOrderStatus('Cancelled')}>
+                    <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+            );
+        };
+        if (order.status === 'Confirmed') {
             return (
                 <TouchableOpacity style={styles.button} onPress={() => updateOrderStatus('Accepted')}>
                     <Text style={styles.buttonText}>Accept</Text>
                 </TouchableOpacity>
             );
-        } else if (order.status === 'Ready for Departure') {
+        } else if (order.status === 'Ready for departure') {
             return (
                 <View style={styles.buttonGroup}>
-                    <TouchableOpacity style={[styles.button, styles.rejectButton]} onPress={() => updateOrderStatus('Rejected')}>
-                        <Text style={styles.buttonText}>Reject</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, styles.outForDeliveryButton]} onPress={() => updateOrderStatus('Out for Delivery')}>
+                    {/*<TouchableOpacity style={[styles.button, styles.rejectButton]} onPress={() => updateOrderStatus('Rejected')}>*/}
+                    {/*    <Text style={styles.buttonText}>Reject</Text>*/}
+                    {/*</TouchableOpacity>*/}
+                    <TouchableOpacity style={[styles.button, styles.outForDeliveryButton]} onPress={() => updateOrderStatus('Out for delivery')}>
                         <Text style={styles.buttonText}>Out for Delivery</Text>
                     </TouchableOpacity>
                 </View>
             );
-        } else if (order.status === 'Out for Delivery') {
+        } else if (order.status === 'Out for delivery') {
             return (
                 <View style={styles.buttonGroup}>
                     <TouchableOpacity style={[styles.button, styles.deliveredButton]} onPress={() => updateOrderStatus('Delivered')}>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -13,6 +13,7 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CONSTANTS from '../constant';
 import { AuthContext } from '../auth/authContext';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const OrdersPage = ({ navigation }) => {
@@ -40,7 +41,7 @@ const OrdersPage = ({ navigation }) => {
                 const storedUserId = await AsyncStorage.getItem('userId');
                 console.log(storedUserId)
                 if (type == "driver") {
-                    const filteredOrder = response.data.filter(order => (order.status == "pending" || order.driverId == storedUserId));
+                    const filteredOrder = response.data.filter(order => ((order.status == "Confirmed" || order.driverId == storedUserId)) && order.status != "Cancelled");
                     setOrders(filteredOrder);
                 } else {
                     const filteredOrder = response.data.filter(order => order.userId == storedUserId);
@@ -52,6 +53,19 @@ const OrdersPage = ({ navigation }) => {
             // Handle login failure
         }
     };
+
+    useFocusEffect(
+        useCallback( () => {
+           async function fetchData() {
+                console.log("Page refreshed");
+                const storedUserType = await AsyncStorage.getItem("userType");
+
+                listOrders(storedUserType);
+                // You can also fetch latest order details or reset the form here
+            }
+            fetchData();
+        }, [])
+    );
 
     useEffect(() => {
         const checkUserType = async () => {

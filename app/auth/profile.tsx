@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -11,11 +11,25 @@ import CONSTANTS from '../constant';
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import { AuthContext } from './authContext';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const ProfilePage = () => {
     const API_URL = CONSTANTS.BASE_URL;
+    const { userType } = useContext(AuthContext);
 
     const [isEditable, setIsEditable] = useState(true);
+    const [applyData, setApplyData] = useState(
+        [
+            { label: 'First Name', key: 'firstname' },
+            { label: 'Last Name', key: 'lastname' },
+            { label: 'Email', key: 'username' }, // Username should always be non-editable
+            { label: 'Mobile', key: 'phone' },
+            { label: 'Address', key: 'address' },
+            { label: 'District', key: 'district' },
+            { label: 'Pin', key: 'pin' }
+        ]
+    )
     const [userData, setUserData] = useState({
         firstname: '',
         lastname: '',
@@ -34,7 +48,19 @@ const ProfilePage = () => {
         try {
             let storedUserId = await AsyncStorage.getItem('userId');
             if (!storedUserId) return;
-
+            if (userType == "driver") {
+                setApplyData([
+                    { label: 'First Name', key: 'firstname' },
+                    { label: 'Last Name', key: 'lastname' },
+                    { label: 'Email', key: 'username' }, // Username should always be non-editable
+                    { label: 'Mobile', key: 'phone' },
+                    { label: 'Address', key: 'address' },
+                    { label: 'District', key: 'district' },
+                    { label: 'Pin', key: 'pin' },
+                    { label: 'Age', key: 'dob' },
+                    { label: 'Gender', key: 'gender' }
+                ])
+            }
             const response = await axios.get(`${API_URL}/user-details?id=${storedUserId}`);
             if (response.data) {
                 setUserData(response.data);
@@ -68,6 +94,10 @@ const ProfilePage = () => {
             formData.append('pin', userData.pin);
             formData.append('district', userData.district);
             formData.append('type', userData.type);
+            if (userType == "driver") {
+                formData.append("dob", userData.dob);
+                formData.append("gender", userData.gender);
+            }
             const response = await axios.put(`${API_URL}/update-user/${storedUserId}`, userData);
             //if (response.status === 204 || response.status === 204) {
             Toast.show({
@@ -85,16 +115,9 @@ const ProfilePage = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
-            {[
-                { label: 'First Name', key: 'firstname' },
-                { label: 'Last Name', key: 'lastname' },
-                { label: 'Email', key: 'username' }, // Username should always be non-editable
-                { label: 'Mobile', key: 'phone' },
-                { label: 'Address', key: 'address' },
-                { label: 'District', key: 'district' },
-                { label: 'Pin', key: 'pin' }
-            ].map((item) => (
+
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+            {applyData.map((item) => (
                 <View key={item.key} style={styles.inputContainer}>
                     <Text style={styles.label}>{item.label}</Text>
                     <TextInput
@@ -110,11 +133,17 @@ const ProfilePage = () => {
             <TouchableOpacity style={styles.button} onPress={handleSave}>
                 <Text style={styles.buttonText}>{'Edit Profile'}</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
+    scrollContainer: {
+        paddingBottom: 50, // Extra bottom space for visibility
+        //flex: 1,
+        backgroundColor: '#f7f7f7',
+        padding: 20,
+    },
     container: {
         flex: 1,
         backgroundColor: '#f7f7f7',
