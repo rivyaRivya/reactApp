@@ -20,6 +20,7 @@ import OrderDetailsPage from "./cart/orderDetails";
 
 import { Ionicons } from '@expo/vector-icons';
 import PaymentScreen from "./cart/checkout";
+import OrderSummary from "./cart/orderSummery";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -183,6 +184,7 @@ export default function Index() {
                 })}                />
                 <Stack.Screen name="Cart" component={CartPage} />
                 <Stack.Screen name="Payment" component={PaymentScreen} />
+                <Stack.Screen name="OrderSummary" component={OrderSummary} />
                     <Stack.Screen name="OrderDetails" component={OrderDetailsPage} />
                     <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />

@@ -4,13 +4,13 @@ import {
     Text,
     StyleSheet,
     FlatList,
-    Image
+    Image,
+    TouchableOpacity
 } from 'react-native';
 import axios from "axios";
 import CONSTANTS from '../constant';
 
-const OrderDetailsPage = ({ route }) => {
-
+const OrderDetailsPage = ({ route, navigation }) => {
     const [order, setOrders] = useState({
         advanced_amount: null,
         assign_date: null,
@@ -25,40 +25,24 @@ const OrderDetailsPage = ({ route }) => {
         userId: null,
         username: null,
         products: []
-});
+    });
 
     const url = CONSTANTS.BASE_URL;
     const API_URL = `${url}`;
-
-    console.log(route.params)
     const data = route.params.order;
+
     const listOrderDetails = async () => {
         try {
-            // Make an API call to the Spring Boot backend login endpoint
             const response = await axios.get(`${API_URL}/get-orderDetails?id=${data.id}`);
-
             if (response) {
-                console.log(response)
                 const datas = {
-                    advanced_amount: response.data.order.advanced_amount,
-                    assign_date: response.data.order.assign_date,
-                    delivery_date: response.data.order.delivery_date,
-                    driverId: response.data.order.driverId,
-                    driverName: response.data.order.driverName,
-                    id: response.data.order.id,
-                    orderDate: response.data.order.orderDate,
-                    paymentStatus: response.data.order.paymentStatus,
-                    status: response.data.order.status,
-                    total_amount: response.data.order.total_amount,
-                    userId: response.data.order.userId,
-                    username: response.data.order.username,
+                    ...response.data.order,
                     products: response.data.product
-                }
+                };
                 setOrders(datas);
             }
         } catch (error) {
-            console.log("rrrrrrrrrrrrrrr")
-            // Handle login failure
+            console.log("Error fetching order details", error);
         }
     };
 
@@ -66,13 +50,48 @@ const OrderDetailsPage = ({ route }) => {
         listOrderDetails();
     }, []);
 
-    // Render each product item
+    const updateOrderStatus = async (status) => {
+        try {
+            await axios.post(`${API_URL}/update-orderStatus`, { id: order.id, status });
+            setOrders((prevOrder) => ({ ...prevOrder, status }));
+        } catch (error) {
+            console.log("Error updating order status", error);
+        }
+    };
+
+    const renderButtons = () => {
+        if (order.status === 'Pending') {
+            return (
+                <TouchableOpacity style={styles.button} onPress={() => updateOrderStatus('Accepted')}>
+                    <Text style={styles.buttonText}>Accept</Text>
+                </TouchableOpacity>
+            );
+        } else if (order.status === 'Ready for Departure') {
+            return (
+                <View style={styles.buttonGroup}>
+                    <TouchableOpacity style={[styles.button, styles.rejectButton]} onPress={() => updateOrderStatus('Rejected')}>
+                        <Text style={styles.buttonText}>Reject</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, styles.outForDeliveryButton]} onPress={() => updateOrderStatus('Out for Delivery')}>
+                        <Text style={styles.buttonText}>Out for Delivery</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        } else if (order.status === 'Out for Delivery') {
+            return (
+                <View style={styles.buttonGroup}>
+                    <TouchableOpacity style={[styles.button, styles.deliveredButton]} onPress={() => updateOrderStatus('Delivered')}>
+                        <Text style={styles.buttonText}>Delivered</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+        return null;
+    };
+
     const renderProductItem = ({ item }) => (
         <View style={styles.productItem}>
-            {/* Product Image */}
             <Image source={{ uri: `data:image/png;base64,${item.image}` }} style={styles.productImage} />
-
-            {/* Product Information */}
             <View style={styles.productDetails}>
                 <Text style={styles.productName}>{item.productname}</Text>
                 <Text style={styles.productQuantity}>Quantity: {item.quantity}</Text>
@@ -83,25 +102,27 @@ const OrderDetailsPage = ({ route }) => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.buttonContainer}>{renderButtons()}</View>
             <Text style={styles.pageTitle}>Order Details</Text>
-
-            {/* Order Information */}
             <Text style={styles.orderId}>Order ID: {order.id}</Text>
             <Text style={styles.customerName}>Customer: {order.username}</Text>
-            {/*<Text style={styles.address}>Address: {order.}</Text>*/}
             <Text style={styles.orderStatus}>Status: {order.status}</Text>
             <Text style={styles.orderStatus}>Advance Amount: ₹{order.advanced_amount}</Text>
             <Text style={styles.orderStatus}>Total Amount: ₹{order.total_amount}</Text>
             <Text style={styles.deliveryTime}>Delivery Time: {order.delivery_date}</Text>
 
-            {/* Product List */}
             <Text style={styles.productListTitle}>Products in this Order:</Text>
-
             <FlatList
                 data={order.products}
                 renderItem={renderProductItem}
-                keyExtractor={(item) => item.productId}
+                keyExtractor={(item) => item.productId?.toString() || Math.random().toString()}
             />
+
+            {order.status == 'pending' && (
+                <TouchableOpacity style={styles.confirmButton} onPress={() => navigation.navigate('OrderSummary')}>
+                    <Text style={styles.buttonText}>Confirm Order</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 };
@@ -111,6 +132,41 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f7f7f7',
         padding: 20,
+    },
+    buttonContainer: {
+        alignItems: 'flex-end',
+        marginBottom: 20,
+    },
+    buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    button: {
+        backgroundColor: '#4CAF50',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginLeft: 10,
+    },
+    confirmButton: {
+        backgroundColor: '#008CBA',
+        padding: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    rejectButton: {
+        backgroundColor: '#D32F2F',
+    },
+    outForDeliveryButton: {
+        backgroundColor: '#FFA000',
+    },
+    deliveredButton: {
+        backgroundColor: '#1976D2',
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
     pageTitle: {
         fontSize: 24,
@@ -123,10 +179,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     customerName: {
-        fontSize: 16,
-        color: '#555',
-    },
-    address: {
         fontSize: 16,
         color: '#555',
     },
@@ -162,20 +214,7 @@ const styles = StyleSheet.create({
     productDetails: {
         flex: 1,
         justifyContent: 'center',
-    },
-    productName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    productQuantity: {
-        fontSize: 16,
-        color: '#555',
-    },
-    productPrice: {
-        fontSize: 16,
-        color: '#888',
-    },
+    }
 });
 
 export default OrderDetailsPage;

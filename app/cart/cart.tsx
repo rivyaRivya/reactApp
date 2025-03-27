@@ -153,7 +153,7 @@ const CartPage = ({ navigation }) => {
             </View>
 
             {/* Checkout Button */}
-            <Button mode="contained" style={styles.checkoutButton} onPress={() => navigation.navigate('Payment')}>
+            <Button mode="contained" style={styles.checkoutButton} onPress={() => navigation.navigate('OrderSummary')}>
                 Proceed to Checkout
             </Button>
         </View>
