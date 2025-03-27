@@ -19,11 +19,12 @@ import ProfilePage from "./auth/profile";
 import OrderDetailsPage from "./cart/orderDetails";
 
 import { Ionicons } from '@expo/vector-icons';
+import PaymentScreen from "./cart/checkout";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function MyDrawer() {
-    const { isLoggedIn, userType, logout } = useContext(AuthContext);
+    const { isLoggedIn, userType, logout, cartCount } = useContext(AuthContext);
     const [initialRoute, setInitialRoute] = useState("Home"); // Default to Home
 
     useEffect(() => {
@@ -109,7 +110,23 @@ function MyDrawer() {
                                     color="white"
                                     onPress={() => navigation.navigate('Cart')} // Navigate to the Cart Page
                                 />
-
+                                {cartCount > 0 && (
+                                    <View style={{
+                                        position: 'absolute',
+                                        right: -5,
+                                        top: -5,
+                                        backgroundColor: 'red',
+                                        borderRadius: 10,
+                                        width: 18,
+                                        height: 18,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                        {/*<Text>*/}
+                                            {/*{cartCount}*/}
+                                        {/*</Text>*/}
+                                    </View>
+                                )}
                             </View>
                         ),
                     })}/>
@@ -164,7 +181,8 @@ export default function Index() {
                         </View>
                     ),
                 })}                />
-                    <Stack.Screen name="Cart" component={CartPage} />
+                <Stack.Screen name="Cart" component={CartPage} />
+                <Stack.Screen name="Payment" component={PaymentScreen} />
                     <Stack.Screen name="OrderDetails" component={OrderDetailsPage} />
                     <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />

@@ -1,14 +1,16 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import CONSTANTS from '../constant';
+import Toast from 'react-native-toast-message';
+import { AuthContext } from '../auth/authContext';
 
 const url = CONSTANTS.BASE_URL;
 const API_URL = `${url}`;
 
-const CartPage = () => {
+const CartPage = ({ navigation }) => {
     const [cartItems, setCartItems] = useState([]);
     const [orderId, setOrderId] = useState(null);
 
@@ -51,6 +53,7 @@ const CartPage = () => {
     // ✅ Remove an item from the cart
     const removeItem = (id) => {
         setCartItems(cartItems.filter(item => item.id !== id));
+        updateCart(id, "remove");
     };
 
     // ✅ Update quantity (increase or decrease)
@@ -60,8 +63,39 @@ const CartPage = () => {
                 ? { ...item, quantity: Math.max(1, item.quantity + change) } // Prevent quantity < 1
                 : item
         ));
+        let type = "inc"
+        if (change == -1)
+            type = "dec"
+        updateCart(id,type)
     };
 
+    const updateCart = async (id,type) => {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const data = {
+            productId: id,
+            quantity: 1,
+            userId: storedUserId,
+            paymentStatus: "pending",
+            advanced_amount: 500,
+            orderDate: new Date(),
+            orderStatus: "pending",
+            total_amount: 0,
+            type: type
+        }
+        const response = await axios.post(`${API_URL}/create-order`, data);
+        if (response) {
+            let message = "Product added to cart!";
+            if (type == "dec")
+                message = "1 item removed from cart!"
+            else if (type == "remove")
+                message = "Product removed from the cart!";
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: message,
+            });
+        }
+    }
     // ✅ Calculate total price
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
@@ -119,7 +153,7 @@ const CartPage = () => {
             </View>
 
             {/* Checkout Button */}
-            <Button mode="contained" style={styles.checkoutButton} onPress={() => Alert.alert("Proceeding to checkout")}>
+            <Button mode="contained" style={styles.checkoutButton} onPress={() => navigation.navigate('Payment')}>
                 Proceed to Checkout
             </Button>
         </View>

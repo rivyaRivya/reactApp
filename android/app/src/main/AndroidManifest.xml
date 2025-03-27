@@ -26,6 +26,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="com.anonymous.woodConnectReactApp"/>
+        <data android:scheme="exp+woodconnectreactapp"/>
       </intent-filter>
     </activity>
   </application>

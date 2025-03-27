@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { Rating } from 'react-native-ratings'; // Importing the Rating component for star ratings
 import axios from "axios";
@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CONSTANTS from "../constant";
+import { AuthContext } from '../auth/authContext';
 
 const ProductDetails = ({ route }) => {
     const { product } = route.params;
@@ -15,6 +16,7 @@ const ProductDetails = ({ route }) => {
     const API_URL = `${url}`;
     const [products, setProduct] = useState(Object);
     const [quantity, setQuantity] = useState(1);
+    const { updateCount } = useContext(AuthContext);
 
     const increaseQuantity = () => setQuantity(quantity + 1);
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
@@ -60,6 +62,7 @@ const ProductDetails = ({ route }) => {
                 type:"inc"
             }
             const response = await axios.post(`${API_URL}/create-order`, data);
+            updateCount();
             //if (response) {
             //    console.log("iii");
                 Toast.show({

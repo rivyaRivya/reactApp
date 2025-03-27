@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -7,77 +7,108 @@ import {
     TouchableOpacity,
     Alert
 } from 'react-native';
+import CONSTANTS from '../constant';
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 const ProfilePage = () => {
-    // Sample user data
-    const user = {
-        email: 'user@example.com',
-        phone: '123-456-7890',
-        address: '123 Main St, Springfield, IL'
+    const API_URL = CONSTANTS.BASE_URL;
+
+    const [isEditable, setIsEditable] = useState(true);
+    const [userData, setUserData] = useState({
+        firstname: '',
+        lastname: '',
+        address: '',
+        username: '',
+        dob: '',
+        phone: '',
+        gender: '',
+        pin: '',
+        district: '',
+        type: '',
+    });
+
+    // Fetch user details
+    const userDetails = async () => {
+        try {
+            let storedUserId = await AsyncStorage.getItem('userId');
+            if (!storedUserId) return;
+
+            const response = await axios.get(`${API_URL}/user-details?id=${storedUserId}`);
+            if (response.data) {
+                setUserData(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching user details", error);
+        }
     };
 
-    const [isEditable, setIsEditable] = useState(false);
-    const [email, setEmail] = useState(user.email);
-    const [phone, setPhone] = useState(user.phone);
-    const [address, setAddress] = useState(user.address);
-
-    // Toggle the editable state
-    const handleEditToggle = () => {
-        setIsEditable(!isEditable);
+    // Handle input change
+    const handleChange = (field: string, value: string) => {
+        setUserData((prevData) => ({
+            ...prevData,
+            [field]: value,
+        }));
     };
 
     // Handle Save action
-    const handleSave = () => {
-        // Here, you would typically send the updated data to the server
-        // For now, we just show an alert
-        Alert.alert('Profile Updated', 'Your profile has been updated successfully!');
-        setIsEditable(false); // Disable editing after saving
+    const handleSave = async () => {
+        try {
+            let storedUserId = await AsyncStorage.getItem('userId');
+            if (!storedUserId) return;
+            const formData = new FormData();
+            formData.append('firstname', userData.firstname);
+            formData.append('lastname', userData.lastname);
+            formData.append('address', userData.address);
+            formData.append('email', userData.username);
+            formData.append('dob', userData.dob);
+            formData.append('phone', userData.phone);
+            formData.append('gender', userData.gender);
+            formData.append('pin', userData.pin);
+            formData.append('district', userData.district);
+            formData.append('type', userData.type);
+            const response = await axios.put(`${API_URL}/update-user/${storedUserId}`, userData);
+            //if (response.status === 204 || response.status === 204) {
+            Toast.show({
+                type: 'success',
+                text1: 'Profile Updated',
+                text2: 'Your profile has been updated successfully!'
+            });
+        } catch (error) {
+            Alert.alert('Error', 'Failed to update profile. Please try again.');
+        }
     };
+
+    useEffect(() => {
+        userDetails();
+    }, []);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.pageTitle}>Profile</Text>
+            {[
+                { label: 'First Name', key: 'firstname' },
+                { label: 'Last Name', key: 'lastname' },
+                { label: 'Email', key: 'username' }, // Username should always be non-editable
+                { label: 'Mobile', key: 'phone' },
+                { label: 'Address', key: 'address' },
+                { label: 'District', key: 'district' },
+                { label: 'Pin', key: 'pin' }
+            ].map((item) => (
+                <View key={item.key} style={styles.inputContainer}>
+                    <Text style={styles.label}>{item.label}</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={userData[item.key] ?? ''} // Ensure it's never undefined
+                        onChangeText={(value) => handleChange(item.key, value)}
+                        editable={item.key !== 'username' ? isEditable : false}
+                    />
+                </View>
+            ))}
 
-            {/* Email */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                    style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    editable={isEditable}
-                    keyboardType="email-address"
-                />
-            </View>
-
-            {/* Phone */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Phone</Text>
-                <TextInput
-                    style={styles.input}
-                    value={phone}
-                    onChangeText={setPhone}
-                    editable={isEditable}
-                    keyboardType="phone-pad"
-                />
-            </View>
-
-            {/* Address */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Address</Text>
-                <TextInput
-                    style={styles.input}
-                    value={address}
-                    onChangeText={setAddress}
-                    editable={isEditable}
-                />
-            </View>
-
-            {/* Edit/Save Button */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={isEditable ? handleSave : handleEditToggle}>
-                <Text style={styles.buttonText}>{isEditable ? 'Save Changes' : 'Edit Profile'}</Text>
+            {/* Toggle Edit Button */}
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+                <Text style={styles.buttonText}>{'Edit Profile'}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -88,12 +119,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f7f7f7',
         padding: 20,
-    },
-    pageTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
     },
     inputContainer: {
         marginBottom: 15,
