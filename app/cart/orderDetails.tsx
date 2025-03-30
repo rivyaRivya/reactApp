@@ -135,7 +135,6 @@ const OrderDetailsPage = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.buttonContainer}>{renderButtons()}</View>
-            <Text style={styles.pageTitle}>Order Details</Text>
             <Text style={styles.orderId}>Order ID: {order.id}</Text>
             <Text style={styles.customerName}>Customer: {order.username}</Text>
             <Text style={styles.orderStatus}>Status: {order.status}</Text>

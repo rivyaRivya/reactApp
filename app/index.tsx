@@ -21,6 +21,8 @@ import OrderDetailsPage from "./cart/orderDetails";
 import { Ionicons } from '@expo/vector-icons';
 import PaymentScreen from "./cart/checkout";
 import OrderSummary from "./cart/orderSummery";
+import QuotationPage from "./product/quotation";
+import QuotationList from "./product/quotationlist";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -81,8 +83,24 @@ function MyDrawer() {
                                 },
                                 headerTintColor: '#fff'
                             })} />
-                    <Drawer.Screen name="Orders" component={OrdersPage} />
-                    <Drawer.Screen name="Profile" component={ProfilePage} />
+                        <Drawer.Screen name="Orders" component={OrdersPage} options={({ navigation }) => ({
+                            headerStyle: {
+                                backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                            }, headerTitleStyle: {
+                                color: '#fff',
+                                fontWeight: 'bold', // Title font weight
+                            },
+                            headerTintColor: '#fff'
+                        })} />
+                        <Drawer.Screen name="Profile" component={ProfilePage} options={({ navigation }) => ({
+                            headerStyle: {
+                                backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                            }, headerTitleStyle: {
+                                color: '#fff',
+                                fontWeight: 'bold', // Title font weight
+                            },
+                            headerTintColor: '#fff'
+                        })} />
                     <Drawer.Screen
                             name="Logout"
                             component={LoginScreen}
@@ -111,28 +129,67 @@ function MyDrawer() {
                                     color="white"
                                     onPress={() => navigation.navigate('Cart')} // Navigate to the Cart Page
                                 />
-                                {cartCount > 0 && (
-                                    <View style={{
-                                        position: 'absolute',
-                                        right: -5,
-                                        top: -5,
-                                        backgroundColor: 'red',
-                                        borderRadius: 10,
-                                        width: 18,
-                                        height: 18,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                        {/*<Text>*/}
-                                            {/*{cartCount}*/}
-                                        {/*</Text>*/}
-                                    </View>
-                                )}
+                                {/*{cartCount > 0 && (*/}
+                                {/*    <View style={{*/}
+                                {/*        position: 'absolute',*/}
+                                {/*        right: -5,*/}
+                                {/*        top: -5,*/}
+                                {/*        backgroundColor: 'red',*/}
+                                {/*        borderRadius: 10,*/}
+                                {/*        width: 18,*/}
+                                {/*        height: 18,*/}
+                                {/*        justifyContent: 'center',*/}
+                                {/*        alignItems: 'center',*/}
+                                {/*    }}>*/}
+                                {/*        */}{/*<Text>*/}
+                                {/*            */}{/*{cartCount}*/}
+                                {/*        */}{/*</Text>*/}
+                                {/*    </View>*/}
+                                {/*)}*/}
                             </View>
                         ),
                     })}/>
-                    <Drawer.Screen name="Orders" component={OrdersPage} />
-                    <Drawer.Screen name="Profile" component={ProfilePage} />
+                    <Drawer.Screen name="Orders" component={OrdersPage}
+                        options={({ navigation }) => ({
+                            headerStyle: {
+                                backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                            }, headerTitleStyle: {
+                                color: '#fff',
+                                fontWeight: 'bold', // Title font weight
+                            },
+                            headerTintColor: '#fff'
+                        })} />
+                      
+                            <Drawer.Screen name="QuotationList" component={QuotationList}
+                                options={({ navigation }) => ({
+                                    headerStyle: {
+                                        backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                                    }, headerTitleStyle: {
+                                        color: '#fff',
+                                        fontWeight: 'bold', // Title font weight
+                                    },
+                                    headerTintColor: '#fff',
+                                    headerRight: () => (
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}>
+                                            <Ionicons
+                                                name="create-outline"
+                                                size={30}
+                                                color="white"
+                                                onPress={() => navigation.navigate('Quotation', { })} // Navigate to the Cart Page
+                                            />
+                                        </View>
+                                    ),
+                                })} />
+                            <Drawer.Screen name="Profile" component={ProfilePage}
+                                options={({ navigation }) => ({
+                                    headerStyle: {
+                                        backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                                    }, headerTitleStyle: {
+                                        color: '#fff',
+                                        fontWeight: 'bold', // Title font weight
+                                    },
+                                    headerTintColor: '#fff'
+                                })} />
                     <Drawer.Screen
                                 name="Logout"
                                 component={LoginScreen}
@@ -158,34 +215,91 @@ export default function Index() {
                     }}
                 >
                     <Stack.Screen name="Home" component={MyDrawer} options={{ headerShown: false }} />
-                    <Stack.Screen name="Product" component={ProductList} />
+                <Stack.Screen name="Product" component={ProductList}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        }
+                    })}                />
                 <Stack.Screen name="ProductDetails" component={ProductDetails}
-                options={({ navigation }) => ({
-                    title: 'Product Details',
-                    headerStyle: {
-                        backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
-                    },
-                    headerTitleStyle: {
-                        color: '#fff',
-                        fontWeight: 'bold', // Title font weight
-                    },
-                    headerTintColor: '#fff',
-                    headerRight: () => (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}>
-                            <Ionicons
-                                name="cart-outline"
-                                size={30}
-                                color="white"
-                                onPress={() => navigation.navigate('Cart')} // Navigate to the Cart Page
-                            />
+                    options={({ navigation }) => ({
+                        title: 'Product Details',
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                        headerRight: () => (
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}>
 
-                        </View>
+                                    <Ionicons
+                                        name="cart-outline"
+                                        size={30}
+                                        color="white"
+                                        onPress={() => navigation.navigate('Cart')} // Navigate to the Cart Page
+                                    />
+
+                                </View>
                     ),
                 })}                />
-                <Stack.Screen name="Cart" component={CartPage} />
-                <Stack.Screen name="Payment" component={PaymentScreen} />
-                <Stack.Screen name="OrderSummary" component={OrderSummary} />
-                    <Stack.Screen name="OrderDetails" component={OrderDetailsPage} />
+                <Stack.Screen name="Cart" component={CartPage}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                    })} />
+                <Stack.Screen name="Payment" component={PaymentScreen}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                    })} />
+                <Stack.Screen name="Quotation" component={QuotationPage}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                    })} />
+                <Stack.Screen name="OrderSummary" component={OrderSummary}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                    })} />
+                <Stack.Screen name="OrderDetails" component={OrderDetailsPage}
+                    options={({ navigation }) => ({
+                        headerStyle: {
+                            backgroundColor: 'rgb(103, 80, 164)', // Background color of the header
+                        },
+                        headerTitleStyle: {
+                            color: '#fff',
+                            fontWeight: 'bold', // Title font weight
+                        },
+                        headerTintColor: '#fff',
+                    })} />
                     <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
                 </Stack.Navigator>

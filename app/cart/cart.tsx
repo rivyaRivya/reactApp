@@ -136,8 +136,6 @@ const CartPage = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.pageTitle}>Your Cart</Text>
-
             {/* Cart Items */}
             <FlatList
                 data={cartItems}
@@ -252,8 +250,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     checkoutButton: {
-        marginTop: 20,
-        paddingVertical: 15,
+      
         backgroundColor: '#4caf50',
     },
     quantityContainer: {

@@ -150,7 +150,7 @@ const OrderSummary = ({navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 10,
         backgroundColor: "#f8f9fa",
     },
     section: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     },
     confirmButtonText: {
         color: "white",
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: "bold",
     },
 });
