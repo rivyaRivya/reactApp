@@ -71,12 +71,24 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             alert("Please fill all required fields.");
             return;
         }
+        let dimPattern = /^\d+(\.\d+)?\*\d+(\.\d+)?\*\d+(\.\d+)?$/;
+
+        console.log(dimensions, dimPattern.test(dimensions))
+        if (!dimPattern.test(dimensions)) {
+            //setTotalPrice("Invalid format");
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid dimensions',
+                text2: 'Add valid dimension in L*W*T format'
+            });
+            return;
+        }
         let storedUserId = await AsyncStorage.getItem('userId');
         const formData = new FormData();
         formData.append('customerName', customerName);
         formData.append('phone', phone);
         formData.append('woodid', woodType);
-        formData.append('dimensions', dimensions);
+        formData.append('dimension', dimensions);
         formData.append('color', color);
         formData.append('quantity', quantity);
         formData.append('additionalNotes', additionalNotes);
@@ -92,14 +104,26 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
 
         Toast.show({
             type: 'success',
-            text1: 'Quotation Sent',
-            text2: 'Your quotation has been sent successfully!'
+            text1: 'Quotation Updated',
+            text2: 'Quotation Updated Successfully!'
         });
         navigation.navigate('QuotationList');
     }
     const handleSend = async () => {
-        if (!customerName || !phone || !additionalNotes || !woodType || !productName) {
+        if (!customerName || !phone || !additionalNotes || !woodType || !productName || !dimensions) {
             alert("Please fill all required fields.");
+            return;
+        }
+        let dimPattern = /^\d+(\.\d+)?\*\d+(\.\d+)?\*\d+(\.\d+)?$/;
+
+        console.log(dimensions, dimPattern.test(dimensions))
+        if (!dimPattern.test(dimensions)) {
+            //setTotalPrice("Invalid format");
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid dimensions',
+                text2: 'Add valid dimension in L*W*T format'
+            });
             return;
         }
         let storedUserId = await AsyncStorage.getItem('userId');
@@ -107,7 +131,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
         formData.append('customerName', customerName);
         formData.append('phone', phone);
         formData.append('woodid', woodType);
-        formData.append('dimensions', dimensions);
+        formData.append('dimension', dimensions);
         formData.append('color', color);
         formData.append('quantity', quantity);
         formData.append('additionalNotes', additionalNotes);
@@ -126,7 +150,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             text1: 'Quotation Sent',
             text2: 'Your quotation has been sent successfully!'
         });
-        navigation.navigate('QuotationList');
+        navigation.navigate('Quotation');
     };
 
     const fetchWood = async () => {
@@ -150,6 +174,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             setQuantity(response.data.quantity || "");
             setWoodType(response.data.woodTypeId || "");
             setProductName(response.data.productName);
+            setDimensions(response.data.dimensions);
             setStatus(response.data.status);
         } catch (error) {
             console.error("Error fetching wood types", error);
@@ -171,6 +196,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
                 <TextInput style={styles.input} placeholder="Phone Number*" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
                 <TextInput style={styles.input} placeholder="Product Name*" value={productName} onChangeText={setProductName} />
                 {/*<TextInput style={styles.input} placeholder="Color / Finish" value={color} onChangeText={setColor} />*/}
+                <TextInput style={styles.input} placeholder="Dimensions (LxWxT in cm)" value={dimensions} onChangeText={setDimensions} />
                 <TextInput style={styles.input} placeholder="Quantity" keyboardType="numeric" value={quantity} onChangeText={setQuantity} />
                 <Text style={styles.label}>Select Wood Type *</Text>
                 <View style={styles.pickerContainer}>

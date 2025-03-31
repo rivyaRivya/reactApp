@@ -129,7 +129,6 @@ const ProductDetails = ({ route }) => {
     const handleSubmit =async () => {
         console.log("clicked", reviewText, rating);
         if (rating) {
-            setShowReview(false);
             const storedUserId = await AsyncStorage.getItem('userId');
             const data = {
                 user_id: storedUserId,
@@ -137,8 +136,9 @@ const ProductDetails = ({ route }) => {
                 review: reviewText,
                 rating: rating
             }
-
+            console.log(data);
             const response = await axios.post(`${API_URL}/review`, data);
+            console.log(response);
             if (response) {
                 Toast.show({
                     type: 'success',
@@ -146,6 +146,9 @@ const ProductDetails = ({ route }) => {
                     text2: 'Review Added',
                 });
                 reviewDetails();
+                setShowReview(false);
+                setReviewText("");
+                setRating(0);
             }
         } else {
             Toast.show({
@@ -211,9 +214,9 @@ const ProductDetails = ({ route }) => {
 
 
                     <View style={styles.container}>
-                        <TouchableOpacity style={styles.addReviewButton} onPress={() => setShowReview(true)}>
+                        {userType == "user" && <TouchableOpacity style={styles.addReviewButton} onPress={() => setShowReview(true)}>
                             <Text style={styles.addReviewText}>Add Review</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity>}
 
                         {showReview && (
                             <View style={styles.reviewBox}>
@@ -253,7 +256,7 @@ const ProductDetails = ({ route }) => {
 
                      Reviews Section 
                     <View style={styles.reviewsContainer}>
-                        <Text style={styles.sectionTitle}>Reviews</Text>
+                        <Text style={styles.sectionTitle}>Customer Reviews</Text>
                         <FlatList
                             data={review}
                             keyExtractor={(item, index) => index.toString()}
@@ -266,7 +269,7 @@ const ProductDetails = ({ route }) => {
                                         ratingCount={5}
                                         imageSize={10}
                                         readonly
-                                        startingValue={item.review.rating}
+                                        startingValue={item.rating}
                                     />
                                 </View>
                             )}
@@ -286,7 +289,7 @@ const styles = {
     productTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
     productPrice: { fontSize: 18, color: '#E91E63', marginBottom: 8 },
     manufactureDate: { fontSize: 14, color: '#777' },
-    sectionTitle: { fontSize: 16, fontWeight: '600', marginTop: 8 },
+    sectionTitle: { fontSize: 16, fontWeight: '600', marginTop: 8 ,marginBottom:10},
     detailText: { fontSize: 14, color: '#444' },
     quantityContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16 },
     quantityButton: { padding: 10, backgroundColor: '#ddd', borderRadius: 8, marginHorizontal: 8 },
@@ -315,6 +318,20 @@ const styles = {
         marginTop: 10,
         padding: 10,
         textAlignVertical: 'top',
+    },
+    addReviewText:{
+        textAlign: "center",
+        color: "green",
+        fontWeight: "bold",
+        padding: 10
+    },
+    addToCartText: {
+        padding: "7",
+        marginBottom: "20",
+        backgroundColor: "#6750a4",
+        borderRadius: 5,
+        color: "white",
+        fontWeight: "bold"
     },
     ratingContainer: {
         marginTop: 20,
