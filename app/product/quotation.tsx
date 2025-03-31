@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Buffer } from "buffer";
 
-const QuotationPage: React.FC = ({ route }) => {
+const QuotationPage: React.FC = ({ route,navigation }) => {
     const { quotation } = route.params;
     const API_URL = CONSTANTS.BASE_URL;
     const [woodTypes, setWoodTypes] = useState([]);
@@ -31,7 +31,7 @@ const QuotationPage: React.FC = ({ route }) => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [woodType, setWoodType] = useState("");
     const [woodPrice, setWoodPrice] = useState("");
-
+    const [productName,setProductName] = useState("");
 
     const requestPermissions = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,7 +65,7 @@ const QuotationPage: React.FC = ({ route }) => {
     };
 
     const handleSend = async () => {
-        if (!customerName || !phone || !additionalNotes || !woodType) {
+        if (!customerName || !phone || !additionalNotes || !woodType || !productName) {
             alert("Please fill all required fields.");
             return;
         }
@@ -81,16 +81,19 @@ const QuotationPage: React.FC = ({ route }) => {
         formData.append('userId', storedUserId);
         formData.append('datas', imageFile);
         formData.append('woodType_id', woodType);
+        formData.append('productName', productName);
         await axios.post(`${API_URL}/quotation`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             }
         });
+
         Toast.show({
             type: 'success',
             text1: 'Quotation Sent',
             text2: 'Your quotation has been sent successfully!'
         });
+        navigation.navigate('QuotationList');
     };
 
     const fetchWood = async () => {
@@ -113,6 +116,7 @@ const QuotationPage: React.FC = ({ route }) => {
             setPhone(response.data.mobile || "");
             setQuantity(response.data.quantity || "");
             setWoodType(response.data.woodTypeId || "");
+            setProductName(response.data.productName);
         } catch (error) {
             console.error("Error fetching wood types", error);
         }
@@ -131,7 +135,7 @@ const QuotationPage: React.FC = ({ route }) => {
             <View style={styles.container}>
                 <TextInput style={styles.input} placeholder="Customer Name*" value={customerName} onChangeText={setCustomerName} />
                 <TextInput style={styles.input} placeholder="Phone Number*" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
-                {/*<TextInput style={styles.input} placeholder="Dimensions (LxWxH in cm)" value={dimensions} onChangeText={setDimensions} />*/}
+                <TextInput style={styles.input} placeholder="Product Name*" value={productName} onChangeText={setProductName} />
                 {/*<TextInput style={styles.input} placeholder="Color / Finish" value={color} onChangeText={setColor} />*/}
                 <TextInput style={styles.input} placeholder="Quantity" keyboardType="numeric" value={quantity} onChangeText={setQuantity} />
                 <Text style={styles.label}>Select Wood Type *</Text>

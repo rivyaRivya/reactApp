@@ -24,6 +24,7 @@ const ProductDetails = ({ route }) => {
     const [showReview, setShowReview] = useState(false);
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(0);
+    const [variant, setVariant] = useState([]);
 
     const increaseQuantity = () => setQuantity(quantity + 1);
     const decreaseQuantity = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
@@ -33,6 +34,27 @@ const ProductDetails = ({ route }) => {
         reviewDetails();
     }, []);
 
+
+    const getVariant = async (mainArray) => {
+        const mainArrayData = mainArray?JSON.parse(mainArray):[];
+        const response = await axios.get(`${API_URL}/get-variant`); // Sample API
+        const updatedArray = mainArrayData.map(item => {
+            // Find the corresponding reference object with the same `id`
+            const matchingReference = response.data.find(ref => ref.type === item.type);
+            return {
+                ...item,
+                values: item.values.map(value => {
+                    if (matchingReference) {
+                        // Find the value inside the matched reference's values array
+                        const matchingValue = matchingReference.values.find(refValue => refValue.id === Number(value.id));
+                        return { ...value, name: matchingValue ? matchingValue.name : "Not Found" };
+                    }
+                    return { ...value, name: "Not Found" };
+                })
+            };
+        });
+        setVariant(updatedArray);
+    }
     const toCamelCase = (str) => {
         console.log(str)
         if (!str || typeof str !== 'string') return '';
@@ -47,6 +69,7 @@ const ProductDetails = ({ route }) => {
         try {
             const response = await axios.get(`${API_URL}/product-details?id=${product.id}`); // Sample API
             setProduct(response.data);
+            getVariant(response.data.variant);
         } catch (error) {
             console.error("Error fetching products", error);
         } finally {
@@ -152,6 +175,16 @@ const ProductDetails = ({ route }) => {
                     <Text style={styles.detailText}>{products.woodtypename}</Text>
                     <Text style={styles.sectionTitle}>Dimensions:</Text>
                     <Text style={styles.detailText}>{products.length} cm x {products.width} cm</Text>
+
+                    {variant.map((variant, index) => (
+                        <View key={index}>
+                            <Text style={styles.sectionTitle}>{variant.type}:</Text>
+                            <Text style={styles.detailText}>
+                                {variant.values.map(val => val.name).join(", ") }
+                            </Text>
+                        </View>
+                    ))}
+
                     <Text style={styles.sectionTitle}>Specifications:</Text>
                     <Text style={styles.detailText}>{products.description}</Text>
                     {userType == "user" ?
