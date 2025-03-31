@@ -174,6 +174,7 @@ const QuotationList = ({ navigation }) => {
                             <Text style={styles.name}>{item.customerName}</Text>
                             <Text>Phone: {item.mobile}</Text>
                             <Text>Wood: {item.woodName} (₹{item.woodPrice})</Text>
+                            <Text>Product Name: {item.productName}</Text>
                             <Text>Quantity: {item.quantity}</Text>
                             <Text>Status: {item.status}</Text>
                             <Text>Notes: {item.description}</Text>

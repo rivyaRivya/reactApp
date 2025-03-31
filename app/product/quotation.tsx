@@ -31,7 +31,8 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [woodType, setWoodType] = useState("");
     const [woodPrice, setWoodPrice] = useState("");
-    const [productName,setProductName] = useState("");
+    const [productName, setProductName] = useState("");
+    const [status, setStatus] = useState("");
 
     const requestPermissions = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -64,6 +65,38 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
         return blob;
     };
 
+
+    const update = async () => {
+        if (!customerName || !phone || !additionalNotes || !woodType || !productName) {
+            alert("Please fill all required fields.");
+            return;
+        }
+        let storedUserId = await AsyncStorage.getItem('userId');
+        const formData = new FormData();
+        formData.append('customerName', customerName);
+        formData.append('phone', phone);
+        formData.append('woodid', woodType);
+        formData.append('dimensions', dimensions);
+        formData.append('color', color);
+        formData.append('quantity', quantity);
+        formData.append('additionalNotes', additionalNotes);
+        formData.append('userId', storedUserId);
+        formData.append('datas', imageFile);
+        formData.append('woodType_id', woodType);
+        formData.append('productName', productName);
+        await axios.post(`${API_URL}/update-quotations/${quotation.id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+
+        Toast.show({
+            type: 'success',
+            text1: 'Quotation Sent',
+            text2: 'Your quotation has been sent successfully!'
+        });
+        navigation.navigate('QuotationList');
+    }
     const handleSend = async () => {
         if (!customerName || !phone || !additionalNotes || !woodType || !productName) {
             alert("Please fill all required fields.");
@@ -117,6 +150,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             setQuantity(response.data.quantity || "");
             setWoodType(response.data.woodTypeId || "");
             setProductName(response.data.productName);
+            setStatus(response.data.status);
         } catch (error) {
             console.error("Error fetching wood types", error);
         }
@@ -160,9 +194,15 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
                         <Text style={styles.uploadText}>Upload Image</Text>
                     </TouchableOpacity>
                     {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
-                    <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                    {quotation && status == "Requested" && < TouchableOpacity style={styles.sendButton} onPress={update}>
+                    <Text style={styles.sendText}>Update Quotation</Text>
+                </TouchableOpacity>}
+
+                    {!quotation && < TouchableOpacity style={styles.sendButton} onPress={handleSend}>
                         <Text style={styles.sendText}>Send Quotation</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
+
+
                 </View>
             </View>
         </ScrollView>
