@@ -150,7 +150,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             text1: 'Quotation Sent',
             text2: 'Your quotation has been sent successfully!'
         });
-        navigation.navigate('Quotation');
+        navigation.navigate('QuotationList');
     };
 
     const fetchWood = async () => {
