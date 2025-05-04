@@ -1,6 +1,6 @@
 
 const CONSTANTS = {
-    BASE_URL : "http://192.168.1.46:8080"
+    BASE_URL: "http://192.168.1.8:8080"
 };
 
 

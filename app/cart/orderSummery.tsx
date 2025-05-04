@@ -35,18 +35,9 @@ const OrderSummary = ({navigation }) => {
             });
             return;
         }
-        const formData = new FormData();
 
-        formData.append('status', "Confirmed");
-        const response = await axios.put(`${API_URL}/update-status/${orderId}`, formData);
-        if (response.status === 204 || response.status === 204) {
-            Toast.show({
-                type: 'success',
-                text1: 'Booking Confirmed',
-                text2: 'Your order booking successfully.Thank you!.'
-            });
-            navigation.navigate('Home');
-        }
+        navigation.navigate('Payment');
+        
     };
     useEffect(() => {
         getOrderId();

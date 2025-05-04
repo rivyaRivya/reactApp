@@ -1,5 +1,5 @@
 // RegisterScreen.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { Formik } from 'formik';
@@ -11,60 +11,81 @@ import Toast from 'react-native-toast-message';
 import CONSTANTS from '../constant';
 
 
-const url = CONSTANTS.BASE_URL;
-const API_URL = `${url}`;
-
-
-// Validation schema
-const validationSchema = Yup.object().shape({
-    firstname: Yup.string().required('Username is required'),
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    mobile: Yup.string()
-        .matches(/^\d{10}$/, 'Mobile number should be 10 digits')
-        .required('Mobile number is required'),
-    password: Yup.string()
-        .min(6, 'Password should be at least 6 characters')
-        .required('Password is required'),
-});
-
 const RegisterScreen = ({ navigation }) => {
+
+    const url = CONSTANTS.BASE_URL;
+    const API_URL = `${url}`;
+
+    // Validation schema
+    const validationSchema = Yup.object().shape({
+        firstname: Yup.string().required('Username is required'),
+        email: Yup.string().email('Invalid email').required('Email is required'),
+        mobile: Yup.string()
+            .matches(/^\d{10}$/, 'Mobile number should be 10 digits')
+            .required('Mobile number is required'),
+        password: Yup.string()
+            .min(6, 'Password should be at least 6 characters')
+            .required('Password is required'),
+    });
+
+    const fetchWood = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/wood-type`);
+
+            console.error( response);
+        } catch (error) {
+            console.error("Error fetching wood", error);
+        } finally {
+        }
+    };
+    const handleFormSubmit = async (values, { resetForm }) => {
+    console.log(values);
+
+    try {
+        const formData = new FormData();
+        formData.append('firstname', values.firstname);
+        formData.append('lastname', values.lastname);
+        formData.append('email', values.email);
+        formData.append('phone', values.mobile);
+        formData.append('password', values.password);
+        formData.append('type', "user");
+
+        console.log(formData, API_URL);
+
+        const response = await axios.post(`${API_URL}/user`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        console.log("Response:", response.data);
+
+        Toast.show({
+            type: 'success',
+            text1: 'Success',
+            text2: 'Register successfully. Please login!',
+        });
+
+        resetForm();
+        navigation.navigate('Login');
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: error.response?.data?.message || error.message || 'Unknown error',
+        });
+    }
+};
+
+
+    useEffect(() => {
+        fetchWood();
+    }, []);
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>Create Account</Text>
             <Formik
                 initialValues={{ firstname: '', lastname: '', email: '', mobile: '', password: '' }}
                 validationSchema={validationSchema}
-                onSubmit={async (values) => {
-                    console.log(values);
-
-                    try {
-                        const formData = new FormData();
-                        formData.append('firstname', values.firstname);
-                        formData.append('lastname', values.lastname);
-                        formData.append('email', values.email);
-                        formData.append('phone', values.mobile);
-                        formData.append('password', values.password);
-                        formData.append('type', "user");
-                        const response = await axios.post(`${API_URL}/user`, formData);
-                        console.log("Response:", response.data);
-
-                        // Show success message
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Success',
-                            text2: 'Register successfully.Please login!',
-                        });
-                        navigation.navigate('Login');
-                    } catch (error) {
-                        console.error("Error submitting form:", error);
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Errro',
-                            text2: 'Failed to register. Please try again!',
-                        });
-                    } 
-                    // You can call your API or do further actions on successful form submission
-                }}
+                onSubmit={handleFormSubmit}
             >
                 {({
                     handleChange,
@@ -138,9 +159,7 @@ const RegisterScreen = ({ navigation }) => {
                             <Text style={styles.errorText}>{errors.password}</Text>
                         )}
 
-                        <Button mode="contained" onPress={() => {
-                            handleSubmit();
-                        }} style={styles.button}>
+                        <Button mode="contained" onPress={handleSubmit} style={styles.button}>
                             Register
                         </Button>
                     </>

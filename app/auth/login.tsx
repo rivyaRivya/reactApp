@@ -18,14 +18,13 @@ const LoginScreen = ({ navigation }) => {
 
     const handleLogin = async () => {
         if (email !=null && password !=null) {
-            Alert.alert("Login Successful", "Welcome back!");
             try {
                 // Make an API call to the Spring Boot backend login endpoint
                 const response = await axios.post(`${API_URL }/login`, {
                     email,
                     password,
                 });
-
+                console.log("data",email)
                 // Handle successful login (e.g., save token to local storage or redirect)
                 if (response) {
                     console.log(response.data);

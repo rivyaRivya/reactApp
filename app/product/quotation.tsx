@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+
 import axios from "axios";
 import CONSTANTS from "../constant";
 import Toast from "react-native-toast-message";
@@ -44,7 +45,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
     const handleImageUpload = async () => {
         await requestPermissions();
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: 'images',
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
@@ -127,6 +128,7 @@ const QuotationPage: React.FC = ({ route,navigation }) => {
             return;
         }
         let storedUserId = await AsyncStorage.getItem('userId');
+        console.log(imageFile);
         const formData = new FormData();
         formData.append('customerName', customerName);
         formData.append('phone', phone);

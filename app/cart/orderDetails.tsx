@@ -75,7 +75,11 @@ const OrderDetailsPage = ({ route, navigation }) => {
                 const formData = new FormData();
 
                 formData.append('status', status);
-                await axios.put(`${API_URL}/update-status/${order.id}`, formData);
+                await axios.put(`${API_URL}/update-status/${order.id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
                 setOrders((prevOrder) => ({ ...prevOrder, status }));
                 listOrderDetails();
             } catch (error) {
@@ -140,7 +144,7 @@ const OrderDetailsPage = ({ route, navigation }) => {
             <Text style={styles.orderStatus}>Status: {order.status}</Text>
             <Text style={styles.orderStatus}>Advance Amount: ₹{order.advanced_amount}</Text>
             <Text style={styles.orderStatus}>Total Amount: ₹{order.total_amount}</Text>
-            <Text style={styles.deliveryTime}>Delivery Time: {order.delivery_date}</Text>
+            <Text style={styles.deliveryTime}>Delivery Date: {order.delivery_date}</Text>
 
             <Text style={styles.productListTitle}>Products in this Order:</Text>
             <FlatList
